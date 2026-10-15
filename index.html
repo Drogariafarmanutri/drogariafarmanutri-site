@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Drogaria Popular Farmanutri | Montes Claros</title>
+<meta name="description" content="Produtos, preços e estoque das lojas Farmanutri em Montes Claros. Monte seu pedido e envie pelo WhatsApp.">
+<meta name="theme-color" content="#E3262B">
+<link rel="icon" href="favicon.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<!--CORPO-->
+<a class="pular" href="#conteudo">Ir para o conteúdo</a>
+
+<div class="faixa"><p class="faixa__in"><span class="faixa__curto">Monte seu pedido no site e envie pelo </span>WhatsApp <a id="faixa-whats" href="#" target="_blank" rel="noopener">(38) 3212-4433</a></p></div>
+
+<header class="cab">
+  <div class="cab__in">
+    <a class="logo" href="#inicio" data-ir="inicio" aria-label="Drogaria Popular Farmanutri, página inicial" id="logo"></a>
+
+    <form class="busca" role="search" id="form-busca">
+      <label class="sr" for="q">Buscar produtos</label>
+      <input id="q" type="search" autocomplete="off" placeholder="O que você precisa?" enterkeyhint="search">
+      <button class="busca__btn" type="submit">
+        <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Zm5.5-2 5 5"/></svg>
+        <span>Buscar</span>
+      </button>
+    </form>
+
+    <div class="acoes">
+      <div class="loja-escolha">
+        <button class="acao" id="btn-loja" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="menu-lojas">
+          <svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+          <span class="acao__txt"><small>Retirar em</small><strong id="loja-atual">Escolha a loja</strong></span>
+        </button>
+        <div class="pop" id="menu-lojas" hidden></div>
+      </div>
+      <a class="acao acao--whats" id="btn-atendimento" href="#" target="_blank" rel="noopener">
+        <svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2c-1.6 0-3.1-.4-4.4-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.3-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3Z"/></svg>
+        <span class="acao__txt"><small>Atendimento</small><strong>WhatsApp</strong></span>
+      </a>
+      <button class="acao acao--pedido" id="btn-pedido" type="button" aria-label="Meu pedido">
+        <span class="acao__icone">
+          <svg aria-hidden="true" viewBox="0 0 24 24" width="26" height="26"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M5 8h14l-1.2 12.1a1 1 0 0 1-1 .9H7.2a1 1 0 0 1-1-.9L5 8Z"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M9 10V6.5a3 3 0 0 1 6 0V10"/></svg>
+          <span class="contador" id="contador" hidden>0</span>
+        </span>
+        <span class="acao__txt"><small>Meu</small><strong>pedido</strong></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<nav class="menu" aria-label="Categorias">
+  <div class="menu__in">
+    <button class="menu__todas" id="btn-categorias" type="button">
+      <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+      <span>Categorias</span>
+    </button>
+    <ul class="menu__lista" id="menu-lista"></ul>
+  </div>
+</nav>
+
+<main id="conteudo">
+  <div id="tela-inicio"></div>
+  <div id="tela-lista" hidden></div>
+</main>
+
+<footer class="rodape">
+  <div class="rodape__aviso">
+    <div class="rodape__in">
+      <h2>Sobre medicamentos</h2>
+      <p>Medicamentos aparecem no site para você saber em qual loja tem. Preço e venda são feitos na loja, com orientação farmacêutica. Controlados e antibióticos não são listados.</p>
+      <p><strong>Se persistirem os sintomas, o médico deverá ser consultado.</strong></p>
+    </div>
+  </div>
+  <div class="rodape__in">
+    <div class="rodape__topo">
+      <div>
+        <div class="logo logo--rodape" id="logo-rodape"></div>
+        <p class="rodape__texto">Drogaria Popular Farmanutri: lojas em vários bairros de Montes Claros. Consulte preço, estoque e faça seu pedido pelo WhatsApp.</p>
+      </div>
+      <div>
+        <h2>Atendimento</h2>
+        <p>WhatsApp <a id="rodape-whats" href="#" target="_blank" rel="noopener">(38) 3212-4433</a></p>
+        <p id="rodape-horario"></p>
+      </div>
+    </div>
+    <h2>Nossas lojas</h2>
+    <ul class="lojas" id="rodape-lojas"></ul>
+    <p class="rodape__nota" id="rodape-nota">Preços e estoque podem mudar ao longo do dia. Ofertas valem enquanto durar o estoque. Imagens meramente ilustrativas.</p>
+  </div>
+</footer>
+
+<dialog class="gaveta gaveta--esq" id="painel-categorias" aria-labelledby="t-cat">
+  <div class="gaveta__topo"><h2 id="t-cat">Categorias</h2><button class="fechar" type="button" data-fechar aria-label="Fechar">&times;</button></div>
+  <div class="gaveta__corpo" id="lista-categorias"></div>
+</dialog>
+
+<dialog class="gaveta gaveta--dir" id="painel-pedido" aria-labelledby="t-ped">
+  <div class="gaveta__topo"><h2 id="t-ped">Meu pedido</h2><button class="fechar" type="button" data-fechar aria-label="Fechar">&times;</button></div>
+  <div class="gaveta__corpo" id="pedido-corpo"></div>
+  <div class="gaveta__pe" id="pedido-pe"></div>
+</dialog>
+
+<dialog class="modal" id="modal-produto" aria-label="Detalhes do produto">
+  <button class="fechar fechar--modal" type="button" data-fechar aria-label="Fechar">&times;</button>
+  <div id="modal-corpo"></div>
+</dialog>
+
+<div class="aviso-toast" id="toast" role="status" aria-live="polite" hidden></div>
+<!--FIM-CORPO-->
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
