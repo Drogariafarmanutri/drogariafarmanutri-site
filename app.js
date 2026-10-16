@@ -262,7 +262,7 @@
 
   function raizes() {
     return dados.categorias.filter(function (c) { return !c.pai || !catPorId[c.pai]; })
-      .sort(function (a, b) { return b._qtd - a._qtd; });
+      .sort(function (a, b) { return (a.ordem || 999) - (b.ordem || 999) || b._qtd - a._qtd; });
   }
 
   function montarMenu() {
