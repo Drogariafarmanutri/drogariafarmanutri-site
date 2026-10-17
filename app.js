@@ -117,7 +117,7 @@
 
   /* ================= preco e estoque ================= */
   function promoDe(p, loja) {
-    if (!p.promo || p.consulta) return null;
+    if (!p.promo || p.consulta || p.rx) return null; // receita: sem oferta/selo (lista de preco)
     if (loja && loja !== "todas") return p.promo[loja] ? { valor: p.promo[loja], loja: loja } : null;
     var com = Object.keys(p.estoque).filter(function (k) { return lojaPorId[k]; });
     if (com.length && com.every(function (k) { return p.promo[k]; })) {
@@ -134,8 +134,17 @@
     var pr = promoDe(p, loja);
     return pr && (loja !== "todas" || pr.geral) ? pr : null;
   }
+  // Medicamento com receita: preco final (ja com a promocao da loja), mostrado como lista de preco
+  function precoRx(p, loja) {
+    var final = function (k) { return (p.promo && p.promo[k]) || p.preco; };
+    if (loja && loja !== "todas") { var v = final(loja); return { min: v, max: v }; }
+    var vals = lojasCom(p).map(final);
+    if (!vals.length) vals = [p.preco];
+    return { min: Math.min.apply(null, vals), max: Math.max.apply(null, vals) };
+  }
   function precoNaLoja(p, loja) {
     if (p.consulta) return null;
+    if (p.rx) return precoRx(p, loja).min;
     var pr = promoValida(p, loja);
     return pr ? pr.valor : p.preco;
   }
@@ -151,7 +160,7 @@
 
   /* ================= cartao de produto ================= */
   function foto(p, classe) {
-    if (p.consulta) return '<img src="img-caixa-medicamento.webp" alt="" loading="lazy" width="400" height="400"' + (classe ? ' class="' + classe + '"' : "") + '>';
+    if (p.consulta || p.rx) return '<img src="img-caixa-medicamento.webp" alt="" loading="lazy" width="400" height="400"' + (classe ? ' class="' + classe + '"' : "") + '>';
     var ph = '<span class="ph">' + icone(p._icone) + '</span>';
     if (!p.img) return ph;
     return '<img src="img/' + p.id + '.webp" alt="" loading="lazy" width="400" height="400" data-ph="' + p._icone + '"' + (classe ? ' class="' + classe + '"' : "") + '>';
@@ -159,6 +168,11 @@
 
   function htmlPreco(p) {
     if (p.consulta) return '<div class="preco"><span class="preco__consulta">Preço na loja<small>Consulte pelo WhatsApp</small></span></div>';
+    if (p.rx) {
+      var f = precoRx(p, estado.loja);
+      return '<div class="preco">' + (f.min !== f.max ? '<span class="preco__nota preco__nota--neutra">a partir de</span>' : "") +
+        '<span class="preco__por">R$ ' + reais(f.min) + '</span><span class="preco__rx">Venda sob prescrição médica</span></div>';
+    }
     var pr = promoDe(p, estado.loja);
     if (pr && (estado.loja !== "todas" || pr.geral)) {
       return '<div class="preco"><span class="preco__de">R$ ' + reais(p.preco) + '</span>' +
@@ -653,6 +667,11 @@
       '<div><p class="card__marca">' + esc(p._marca) + '</p><h2>' + esc(p._nome) + '</h2>' +
       htmlPreco(p) +
       (p.consulta ? '<p class="detalhe__aviso">Medicamento: o preço e a venda são feitos na loja, com orientação farmacêutica.</p>' : "") +
+      (p.rx ? '<p class="detalhe__aviso"><strong>Venda sob prescrição médica.</strong> Apresente a receita na retirada. Preço final na loja escolhida, já com desconto quando houver.</p>' : "") +
+      (p.med && (p.substancia || p.registro || p.lab) ? '<dl class="detalhe__ficha">' +
+        (p.substancia ? '<dt>Substância</dt><dd>' + esc(nomeProduto(p.substancia)) + '</dd>' : "") +
+        (p.lab ? '<dt>Laboratório</dt><dd>' + esc(nomeMarca(p.lab)) + '</dd>' : "") +
+        (p.registro ? '<dt>Registro MS</dt><dd>' + esc(p.registro) + '</dd>' : "") + '</dl>' : "") +
       '<ul class="detalhe__lojas" aria-label="Estoque por loja">' + lojas + '</ul>' +
       '<div class="detalhe__acoes"><div class="card__acao" data-card="' + p.id + '">' + htmlBotao(p) + '</div>' +
       '<a class="botao botao--contorno" target="_blank" rel="noopener" href="' + esc(linkWhats(estado.loja === "todas" ? "" : estado.loja, msg)) + '">Perguntar pelo WhatsApp</a></div>' +

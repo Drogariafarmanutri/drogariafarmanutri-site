@@ -227,6 +227,11 @@ h1, h2, h3 { text-wrap: balance; }
 .preco__por { font: 800 24px/1.05 var(--f-titulo); font-stretch: 85%; color: var(--tinta); font-variant-numeric: tabular-nums; }
 .preco__por--oferta { color: var(--oferta); }
 .preco__nota { font-size: 12px; color: var(--oferta); font-weight: 700; }
+.preco__rx { display: block; font-size: 12px; color: var(--azul); font-weight: 700; margin-top: 3px; }
+.preco__nota--neutra { color: var(--apagado); font-weight: 400; }
+.detalhe__ficha { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 14px; margin: 0 0 16px; }
+.detalhe__ficha dt { color: var(--apagado); }
+.detalhe__ficha dd { margin: 0; }
 .preco__consulta { font-weight: 700; color: var(--azul); font-size: 15px; }
 .preco__consulta small { display: block; font-weight: 400; font-size: 12px; color: var(--apagado); }
 .disp { font-size: 13px; color: var(--apagado); margin: 0; display: flex; align-items: center; gap: 6px; }
