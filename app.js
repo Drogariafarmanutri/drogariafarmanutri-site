@@ -266,7 +266,8 @@
     var digitos = /^\d{5,}$/.test(t);
     return dados.produtos.filter(function (p) {
       if (!visivel(p, loja)) return false;
-      if (digitos) return p.ean.indexOf(t) >= 0 || String(p.id) === t;
+      // Codigo de barras: vale qualquer um dos codigos do produto
+      if (digitos) return String(p.id) === t || [p.ean].concat(p.eans || []).some(function (e) { return e && e.indexOf(t) >= 0; });
       for (var i = 0; i < termos.length; i++) if (p._busca.indexOf(termos[i]) < 0) return false;
       return true;
     });
@@ -754,7 +755,7 @@
       '<ul class="detalhe__lojas" aria-label="Estoque por loja">' + lojas + '</ul>' +
       '<div class="detalhe__acoes"><div class="card__acao" data-card="' + p.id + '">' + htmlBotao(p) + '</div>' +
       '<a class="botao botao--contorno" target="_blank" rel="noopener" href="' + esc(linkWhats(estado.loja === "todas" ? "" : estado.loja, msg)) + '">Perguntar pelo WhatsApp</a></div>' +
-      '<p class="detalhe__cod">Código ' + p.id + (p.ean ? " · EAN " + esc(p.ean) : "") + '</p></div></div>';
+      '<p class="detalhe__cod">Código ' + p.id + (p.ean ? " · EAN " + esc([p.ean].concat(p.eans || []).join(", ")) : "") + '</p></div></div>';
     if (!soAtualizar && !$("modal-produto").open) abrirDialogo($("modal-produto"));
   }
 
