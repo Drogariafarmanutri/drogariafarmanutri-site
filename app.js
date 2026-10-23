@@ -183,6 +183,8 @@
   /* ================= cartao de produto ================= */
   function foto(p, classe) {
     if (p.consulta || p.rx) return '<img src="img-caixa-medicamento.webp" alt="" loading="lazy" width="400" height="400"' + (classe ? ' class="' + classe + '"' : "") + '>';
+    // Medicamento isento sem foto propria: caixa ilustrativa com a logo da farmacia
+    if (p.med && !p.img) return '<img src="img-caixa-mip.webp" alt="" loading="lazy" width="400" height="400"' + (classe ? ' class="' + classe + '"' : "") + '>';
     var ph = '<span class="ph">' + icone(p._icone) + '</span>';
     if (!p.img) return ph;
     return '<img src="img/' + p.id + '.webp" alt="" loading="lazy" width="400" height="400" data-ph="' + p._icone + '"' + (classe ? ' class="' + classe + '"' : "") + '>';
@@ -317,15 +319,19 @@
     // Medicamentos sempre primeiro na barra, para nunca ir parar no "Mais"
     var barra = raizes().slice(0, 9);
     barra.sort(function (x, y) { return (y._nome.toLowerCase() === "medicamentos") - (x._nome.toLowerCase() === "medicamentos"); });
-    var html = barra.map(function (c) {
+    var itens = barra.map(function (c) {
       return '<li><a href="#cat-' + c.id + '" data-cat="' + c.id + '">' + esc(c._nome) + '</a></li>';
-    }).join("");
-    if (dados.produtos.some(function (p) { return p.leve; })) {
-      html = '<li><a class="menu__ofertas" href="#leve-mais" data-ir="leve">Leve mais</a></li>' + html;
-    }
+    });
+    var especiais = "";
     if (dados.produtos.some(function (p) { return p.promo; })) {
-      html = '<li><a class="menu__ofertas" href="#ofertas" data-ir="ofertas">Ofertas</a></li>' + html;
+      especiais += '<li><a class="menu__ofertas" href="#ofertas" data-ir="ofertas">Ofertas</a></li>';
     }
+    if (dados.produtos.some(function (p) { return p.leve; })) {
+      especiais += '<li><a class="menu__ofertas" href="#leve-mais" data-ir="leve">Leve mais</a></li>';
+    }
+    // Ordem: Medicamentos, Ofertas, Leve mais e depois as demais categorias
+    var temMed = barra.length && barra[0]._nome.toLowerCase() === "medicamentos";
+    var html = temMed ? itens[0] + especiais + itens.slice(1).join("") : especiais + itens.join("");
     $("menu-lista").innerHTML = html;
     $("menu-mais-lista").innerHTML = "";
     ajustarMenu();

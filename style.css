@@ -59,8 +59,8 @@ h1, h2, h3 { text-wrap: balance; }
   display: grid; grid-template-columns: auto 1fr auto; grid-template-areas: "logo busca acoes"; gap: 12px 24px; align-items: center;
 }
 .logo { grid-area: logo; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; color: var(--marca); }
-.logo img { height: 60px; width: auto; }
-.logo .logo__icone { height: 54px; }
+.logo img { height: 84px; width: auto; }
+.logo .logo__icone { height: 78px; }
 .logo__cruz { width: 34px; height: 34px; flex: none; }
 .logo__nome { display: flex; flex-direction: column; line-height: .9; }
 .logo__nome b { font: 900 28px/0.9 var(--f-titulo); font-stretch: 78%; letter-spacing: -0.01em; }
@@ -412,7 +412,7 @@ dialog::backdrop { background: rgba(38, 20, 18, .5); }
   .faixa__curto { display: none; }
   .busca__btn span { display: none; }
   .busca__btn { padding: 0 16px; }
-  .logo img { height: 50px; }
+  .logo img { height: 62px; }
   .logo .logo__icone { display: none; }
   .acoes { gap: 0; }
   .menu__todas span { display: none; }
