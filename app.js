@@ -8,7 +8,7 @@
 
   var dados = { lojas: [], categorias: [], produtos: [] };
   var porId = {}, lojaPorId = {}, catPorId = {}, filhos = {};
-  var estado = { tela: "inicio", q: "", cat: null, ofertas: false, loja: "todas", ordem: "relevancia", limite: POR_PAGINA };
+  var estado = { tela: "inicio", q: "", cat: null, ofertas: false, leve: false, loja: "todas", ordem: "relevancia", limite: POR_PAGINA };
   var pedido = {};
   var lojaPedido = "";
 
@@ -129,6 +129,25 @@
     });
     return melhor;
   }
+  // Leve mais, pague menos: { qtd, valor, loja, geral } (preco por unidade levando qtd ou mais)
+  function leveDe(p, loja) {
+    if (!p.leve || p.consulta) return null;
+    if (loja && loja !== "todas") {
+      var l = p.leve[loja];
+      return l ? { qtd: l[0], valor: l[1], loja: loja, geral: true } : null;
+    }
+    var com = lojasCom(p), melhor = null;
+    com.forEach(function (k) {
+      var l = p.leve[k];
+      if (l && (!melhor || l[1] < melhor.valor)) melhor = { qtd: l[0], valor: l[1], loja: k };
+    });
+    if (melhor) melhor.geral = com.every(function (k) { return p.leve[k] && p.leve[k][0] === melhor.qtd && p.leve[k][1] === melhor.valor; });
+    return melhor;
+  }
+  function descontoLeve(p) {
+    var l = leveDe(p, estado.loja);
+    return l ? Math.round((1 - l.valor / p.preco) * 100) : 0;
+  }
   // Promocao que vale para o que esta sendo mostrado (loja escolhida ou todas as lojas)
   function promoValida(p, loja) {
     var pr = promoDe(p, loja);
@@ -142,11 +161,14 @@
     if (!vals.length) vals = [p.preco];
     return { min: Math.min.apply(null, vals), max: Math.max.apply(null, vals) };
   }
-  function precoNaLoja(p, loja) {
+  function precoNaLoja(p, loja, qtd) {
     if (p.consulta) return null;
-    if (p.rx) return precoRx(p, loja).min;
-    var pr = promoValida(p, loja);
-    return pr ? pr.valor : p.preco;
+    var base;
+    if (p.rx) base = precoRx(p, loja).min;
+    else { var pr = promoValida(p, loja); base = pr ? pr.valor : p.preco; }
+    // No pedido (loja escolhida): levando a quantidade minima, vale o preco do leve mais
+    var l = qtd && loja !== "todas" ? leveDe(p, loja) : null;
+    return l && qtd >= l.qtd && l.valor < base ? l.valor : base;
   }
   function desconto(p) {
     var pr = promoValida(p, estado.loja);
@@ -183,6 +205,15 @@
       '<span class="preco__por">R$ ' + reais(p.preco) + '</span></div>';
   }
 
+  function htmlLeve(p) {
+    var l = leveDe(p, estado.loja);
+    if (!l) return "";
+    var onde = l.geral ? "" : " no " + esc(nomeLoja(l.loja));
+    // Venda sob prescricao: so a informacao de preco, em texto simples (sem destaque de oferta)
+    if (p.rx) return '<p class="leve leve--rx">Preço por unidade levando ' + l.qtd + onde + ': R$ ' + reais(l.valor) + '</p>';
+    return '<p class="leve"><strong>Levando ' + l.qtd + ':</strong> R$ ' + reais(l.valor) + ' cada' + onde + '</p>';
+  }
+
   function htmlDisp(p) {
     if (estado.loja !== "todas") {
       var q = p.estoque[estado.loja];
@@ -207,13 +238,15 @@
   function card(p) {
     var d = desconto(p);
     var selo = d >= 1 ? '<span class="selo">-' + d + '%</span>' :
-      (promoDe(p, "todas") ? '<span class="selo">Oferta</span>' : (p.med ? '<span class="selo selo--med">Medicamento</span>' : ""));
+      (promoDe(p, "todas") ? '<span class="selo">Oferta</span>' :
+        (leveDe(p, "todas") && !p.rx ? '<span class="selo selo--leve">Leve ' + leveDe(p, "todas").qtd + '</span>' :
+          (p.med ? '<span class="selo selo--med">Medicamento</span>' : "")));
     return '<article class="card" data-card="' + p.id + '">' +
       '<button class="card__foto" type="button" data-abrir="' + p.id + '" aria-label="Ver detalhes de ' + esc(p._nome) + '">' + selo + foto(p) + '</button>' +
       '<div class="card__corpo">' +
       '<p class="card__marca">' + esc(p._marca || " ") + '</p>' +
       '<h3 class="card__nome"><button type="button" data-abrir="' + p.id + '">' + esc(p._nome) + '</button></h3>' +
-      htmlPreco(p) + htmlDisp(p) +
+      htmlPreco(p) + htmlLeve(p) + htmlDisp(p) +
       '<div class="card__acao">' + htmlBotao(p) + '</div>' +
       '</div></article>';
   }
@@ -241,6 +274,7 @@
     var lista = estado.q ? buscar(estado.q, estado.loja) : dados.produtos.filter(function (p) { return visivel(p, estado.loja); });
     if (estado.cat) lista = lista.filter(function (p) { return p._cats[estado.cat]; });
     if (estado.ofertas) lista = lista.filter(function (p) { return promoDe(p, estado.loja); });
+    if (estado.leve) lista = lista.filter(function (p) { return leveDe(p, estado.loja); });
     var primeiro = norm(estado.q).split(/\s+/)[0] || "";
     var ordem = estado.ordem;
     lista.sort(function (a, b) {
@@ -250,7 +284,7 @@
         if (pb == null && pa != null) return -1;
         if (pa != null && pb != null && pa !== pb) return ordem === "menor" ? pa - pb : pb - pa;
       } else if (ordem === "desconto") {
-        var d = descontoMax(b) - descontoMax(a);
+        var d = estado.leve ? descontoLeve(b) - descontoLeve(a) : descontoMax(b) - descontoMax(a);
         if (d) return d;
       } else if (ordem === "relevancia") {
         if (primeiro) {
@@ -286,6 +320,9 @@
     var html = barra.map(function (c) {
       return '<li><a href="#cat-' + c.id + '" data-cat="' + c.id + '">' + esc(c._nome) + '</a></li>';
     }).join("");
+    if (dados.produtos.some(function (p) { return p.leve; })) {
+      html = '<li><a class="menu__ofertas" href="#leve-mais" data-ir="leve">Leve mais</a></li>' + html;
+    }
     if (dados.produtos.some(function (p) { return p.promo; })) {
       html = '<li><a class="menu__ofertas" href="#ofertas" data-ir="ofertas">Ofertas</a></li>' + html;
     }
@@ -410,6 +447,9 @@
     var ofertas = dados.produtos.filter(function (p) { return visivel(p, estado.loja) && promoDe(p, estado.loja); })
       .sort(function (a, b) { return descontoMax(b) - descontoMax(a) || (b.img || 0) - (a.img || 0); }).slice(0, 18);
 
+    var leves = dados.produtos.filter(function (p) { return visivel(p, estado.loja) && leveDe(p, estado.loja); })
+      .sort(function (a, b) { return (a.rx ? 1 : 0) - (b.rx ? 1 : 0) || descontoLeve(b) - descontoLeve(a) || (b.img || 0) - (a.img || 0); }).slice(0, 18);
+
     var atalhos = (CFG.atalhos || ATALHOS_PADRAO).map(function (a) {
       var n = buscar(a.busca, "todas").length;
       return n ? '<a class="atalho" href="#busca" data-busca="' + esc(a.busca) + '"><strong>' + esc(a.titulo) + '</strong><span>' + n + (n === 1 ? " produto" : " produtos") + '</span></a>' : "";
@@ -429,6 +469,7 @@
       '<ul class="beneficios">' + beneficios + '</ul>' +
       (circulos ? '<section class="secao"><div class="secao__topo"><h2>Categorias</h2></div><div class="circulos">' + circulos + '</div></section>' : "") +
       (ofertas.length ? faixaProdutos("Ofertas em destaque" + (estado.loja !== "todas" ? " no " + nomeLoja(estado.loja) : ""), ofertas, "#ofertas", 'data-ir="ofertas"') : "") +
+      (leves.length ? faixaProdutos("Leve mais, pague menos", leves, "#leve-mais", 'data-ir="leve"') : "") +
       (atalhos.length ? '<section class="secao"><div class="secao__topo"><h2>Do que você precisa hoje?</h2></div><div class="atalhos">' + atalhos.join("") + '</div></section>' : "");
 
     vitrines.forEach(function (c) {
@@ -499,7 +540,7 @@
   /* ================= lista (busca, categoria, ofertas) ================= */
   function telaLista() {
     var lista = listaAtual();
-    var titulo = estado.q ? "Resultados para “" + estado.q + "”" : estado.cat ? catPorId[estado.cat]._nome : estado.ofertas ? "Ofertas" : "Todos os produtos";
+    var titulo = estado.q ? "Resultados para “" + estado.q + "”" : estado.cat ? catPorId[estado.cat]._nome : estado.ofertas ? "Ofertas" : estado.leve ? "Leve mais, pague menos" : "Todos os produtos";
     var trilha = '<a href="#inicio" data-ir="inicio">Início</a> <span aria-hidden="true">›</span> ';
     if (estado.cat && catPorId[estado.cat] && catPorId[estado.cat].pai && catPorId[catPorId[estado.cat].pai]) {
       var pai = catPorId[catPorId[estado.cat].pai];
@@ -510,6 +551,7 @@
     // Base para contar subcategorias (sem o filtro de categoria)
     var base = estado.q ? buscar(estado.q, estado.loja) : dados.produtos.filter(function (p) { return visivel(p, estado.loja); });
     if (estado.ofertas) base = base.filter(function (p) { return promoDe(p, estado.loja); });
+    if (estado.leve) base = base.filter(function (p) { return leveDe(p, estado.loja); });
     var cand = estado.cat ? (filhos[estado.cat] || []) : raizes();
     var contagem = cand.map(function (c) {
       return { c: c, n: base.filter(function (p) { return p._cats[c.id]; }).length };
@@ -554,7 +596,8 @@
     if (inicio) telaInicio(); else telaLista();
     document.querySelectorAll("#menu-lista a, #menu-mais-lista a").forEach(function (a) {
       var ativo = (a.getAttribute("data-cat") && String(estado.cat) === a.getAttribute("data-cat") && !estado.q) ||
-        (a.getAttribute("data-ir") === "ofertas" && estado.ofertas && !estado.cat && !estado.q);
+        (a.getAttribute("data-ir") === "ofertas" && estado.ofertas && !estado.cat && !estado.q) ||
+        (a.getAttribute("data-ir") === "leve" && estado.leve && !estado.cat && !estado.q);
       if (ativo) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
     });
     if (rolarTopo) window.scrollTo(0, 0);
@@ -566,10 +609,11 @@
     estado.q = opcoes.q || "";
     estado.cat = opcoes.cat || null;
     estado.ofertas = !!opcoes.ofertas;
+    estado.leve = !!opcoes.leve;
     estado.limite = POR_PAGINA;
-    if (tela !== "inicio" && !opcoes.manterOrdem) estado.ordem = opcoes.ofertas ? "desconto" : "relevancia";
+    if (tela !== "inicio" && !opcoes.manterOrdem) estado.ordem = opcoes.ofertas || opcoes.leve ? "desconto" : "relevancia";
     $("q").value = estado.q;
-    var hash = tela === "inicio" ? "#inicio" : estado.q ? "#busca" : estado.cat ? "#cat-" + estado.cat : "#ofertas";
+    var hash = tela === "inicio" ? "#inicio" : estado.q ? "#busca" : estado.cat ? "#cat-" + estado.cat : estado.leve ? "#leve-mais" : "#ofertas";
     if (location.hash !== hash) { try { history.pushState(null, "", hash); } catch (e) { /* sem historico */ } }
     fecharTudo();
     desenhar(true);
@@ -580,6 +624,7 @@
     var m = /^cat-(\d+)$/.exec(h);
     if (m && catPorId[m[1]]) return ir("lista", { cat: Number(m[1]) });
     if (h === "ofertas") return ir("lista", { ofertas: true });
+    if (h === "leve-mais") return ir("lista", { leve: true });
     if (h === "busca" && estado.q) return ir("lista", { q: estado.q });
     if (h === "como-funciona") { ir("inicio"); var el = $("como-funciona"); if (el) el.scrollIntoView(); return; }
     ir("inicio");
@@ -595,6 +640,7 @@
       return c ? ir("lista", { cat: c.id }) : ir("lista", { q: decodeURIComponent(m[1]) });
     }
     if (href === "#ofertas") return ir("lista", { ofertas: true });
+    if (href === "#leve-mais") return ir("lista", { leve: true });
     if (href === "#como-funciona") {
       if (estado.tela !== "inicio") ir("inicio");
       var el = $("como-funciona"); if (el) el.scrollIntoView({ behavior: "smooth" });
@@ -642,11 +688,13 @@
     var total = 0, consultas = 0;
     $("pedido-corpo").innerHTML = ids.map(function (id) {
       var p = porId[id], q = pedido[id];
-      var preco = precoNaLoja(p, lojaPedido);
+      var preco = precoNaLoja(p, lojaPedido, q);
       if (preco != null) total += preco * q; else consultas++;
+      var lv = leveDe(p, lojaPedido);
       var falta = !p.estoque[lojaPedido];
       return '<div class="item"><div class="item__foto">' + foto(p) + '</div><div>' +
         '<p class="item__nome">' + esc(p._nome) + '</p>' +
+        (lv && q < lv.qtd && !p.rx ? '<p class="item__dica">Levando ' + lv.qtd + ', sai R$ ' + reais(lv.valor) + ' cada.</p>' : "") +
         (falta ? '<p class="item__alerta">Sem estoque no ' + esc(nomeLoja(lojaPedido)) + '. Tem em: ' + esc(lojasCom(p).map(nomeLoja).join(", ")) + '.</p>' : "") +
         '<div class="item__linha"><div class="qtd" role="group" aria-label="Quantidade"><button type="button" data-menos="' + id + '" aria-label="Diminuir">−</button><output>' + q + '</output><button type="button" data-mais="' + id + '" aria-label="Aumentar">+</button></div>' +
         '<span class="item__preco">' + (preco != null ? "R$ " + reais(preco * q) : "Preço na loja") + '</span></div>' +
@@ -666,7 +714,7 @@
 
   function linkPedido(ids, total) {
     var linhas = ids.map(function (id) {
-      var p = porId[id], q = pedido[id], preco = precoNaLoja(p, lojaPedido);
+      var p = porId[id], q = pedido[id], preco = precoNaLoja(p, lojaPedido, q);
       return "• " + q + "x " + p._nome + " (cód. " + p.id + ")" + (preco != null ? " - R$ " + reais(preco) + " cada" : " - consultar preço");
     });
     var txt = "Olá! Quero fazer um pedido pelo site para retirar na loja " + nomeLoja(lojaPedido) + ":\n\n" + linhas.join("\n") +
@@ -690,7 +738,7 @@
     $("modal-corpo").innerHTML = '<div class="detalhe">' +
       '<div class="detalhe__foto">' + (d ? '<span class="selo">-' + d + '%</span>' : "") + foto(p) + '</div>' +
       '<div><p class="card__marca">' + esc(p._marca) + '</p><h2>' + esc(p._nome) + '</h2>' +
-      htmlPreco(p) +
+      htmlPreco(p) + htmlLeve(p) +
       (p.consulta ? '<p class="detalhe__aviso">Medicamento: o preço e a venda são feitos na loja, com orientação farmacêutica.</p>' : "") +
       (p.rx ? '<p class="detalhe__aviso"><strong>Venda sob prescrição médica.</strong> Apresente a receita na retirada. Preço final na loja escolhida, já com desconto quando houver.</p>' : "") +
       (p.med && (p.substancia || p.registro || p.lab) ? '<dl class="detalhe__ficha">' +
@@ -757,7 +805,8 @@
     if ((el = t.closest("[data-busca]"))) { e.preventDefault(); ir("lista", { q: el.getAttribute("data-busca") }); return; }
     if ((el = t.closest("[data-ir]"))) {
       e.preventDefault();
-      if (el.getAttribute("data-ir") === "ofertas") ir("lista", { ofertas: true }); else ir("inicio");
+      var destino = el.getAttribute("data-ir");
+      if (destino === "ofertas") ir("lista", { ofertas: true }); else if (destino === "leve") ir("lista", { leve: true }); else ir("inicio");
       return;
     }
     if ((el = t.closest("[data-link]"))) { e.preventDefault(); seguirLink(el.getAttribute("data-link")); return; }
