@@ -280,19 +280,44 @@
   }
 
   function montarMenu() {
-    var html = raizes().slice(0, 9).map(function (c) {
+    // Medicamentos sempre primeiro na barra, para nunca ir parar no "Mais"
+    var barra = raizes().slice(0, 9);
+    barra.sort(function (x, y) { return (y._nome.toLowerCase() === "medicamentos") - (x._nome.toLowerCase() === "medicamentos"); });
+    var html = barra.map(function (c) {
       return '<li><a href="#cat-' + c.id + '" data-cat="' + c.id + '">' + esc(c._nome) + '</a></li>';
     }).join("");
     if (dados.produtos.some(function (p) { return p.promo; })) {
       html = '<li><a class="menu__ofertas" href="#ofertas" data-ir="ofertas">Ofertas</a></li>' + html;
     }
     $("menu-lista").innerHTML = html;
+    $("menu-mais-lista").innerHTML = "";
+    ajustarMenu();
     $("lista-categorias").innerHTML = '<ul class="cat-arvore">' + raizes().map(function (c) {
       var sub = (filhos[c.id] || []).filter(function (f) { return f._qtd; });
       return '<li><a href="#cat-' + c.id + '" data-cat="' + c.id + '">' + esc(c._nome) + '</a>' +
         (sub.length ? '<ul>' + sub.map(function (f) { return '<li><a href="#cat-' + f.id + '" data-cat="' + f.id + '">' + esc(f._nome) + '</a></li>'; }).join("") + '</ul>' : "") +
         '</li>';
     }).join("") + '</ul>';
+  }
+
+  /* Barra de categorias: o que nao cabe na largura da tela vai para o botao "Mais" */
+  function ajustarMenu() {
+    var ul = $("menu-lista"), mais = $("menu-mais"), lista = $("menu-mais-lista");
+    if (!ul || !mais) return;
+    while (lista.firstChild) ul.appendChild(lista.firstChild);
+    mais.hidden = true;
+    fecharMais();
+    if (ul.scrollWidth <= ul.clientWidth + 1) return;
+    mais.hidden = false;
+    while (ul.children.length > 1 && ul.scrollWidth > ul.clientWidth + 1) {
+      lista.insertBefore(ul.lastElementChild, lista.firstChild);
+    }
+  }
+
+  function fecharMais() {
+    if (!$("menu-mais-lista")) return;
+    $("menu-mais-lista").hidden = true;
+    $("btn-menu-mais").setAttribute("aria-expanded", "false");
   }
 
   function montarLojas() {
@@ -527,7 +552,7 @@
     $("tela-inicio").hidden = !inicio;
     $("tela-lista").hidden = inicio;
     if (inicio) telaInicio(); else telaLista();
-    document.querySelectorAll("#menu-lista a").forEach(function (a) {
+    document.querySelectorAll("#menu-lista a, #menu-mais-lista a").forEach(function (a) {
       var ativo = (a.getAttribute("data-cat") && String(estado.cat) === a.getAttribute("data-cat") && !estado.q) ||
         (a.getAttribute("data-ir") === "ofertas" && estado.ofertas && !estado.cat && !estado.q);
       if (ativo) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
@@ -713,6 +738,13 @@
   document.addEventListener("click", function (e) {
     var t = e.target;
     var el;
+    if (t.closest("#btn-menu-mais")) {
+      var abrir = $("menu-mais-lista").hidden;
+      $("menu-mais-lista").hidden = !abrir;
+      $("btn-menu-mais").setAttribute("aria-expanded", String(abrir));
+      return;
+    }
+    fecharMais();
     if ((el = t.closest("[data-add]"))) { mudarQtd(el.getAttribute("data-add"), 1); return; }
     if ((el = t.closest("[data-mais]"))) { mudarQtd(el.getAttribute("data-mais"), 1); return; }
     if ((el = t.closest("[data-menos]"))) { mudarQtd(el.getAttribute("data-menos"), -1); return; }
@@ -819,6 +851,9 @@
     montarRodape();
     montarLojas();
     montarMenu();
+    var tempoMenu;
+    window.addEventListener("resize", function () { clearTimeout(tempoMenu); tempoMenu = setTimeout(ajustarMenu, 120); });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(ajustarMenu);
     contador();
     var termo = new URLSearchParams(location.search).get("q");
     if (termo) { ir("lista", { q: termo }); return; }
