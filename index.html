@@ -70,6 +70,8 @@
   </div>
 </nav>
 
+<div class="aviso" id="aviso" hidden></div>
+
 <main id="conteudo">
   <div id="tela-inicio"></div>
   <div id="tela-lista" hidden></div>
@@ -115,6 +117,11 @@
 <dialog class="modal" id="modal-produto" aria-label="Detalhes do produto">
   <button class="fechar fechar--modal" type="button" data-fechar aria-label="Fechar">&times;</button>
   <div id="modal-corpo"></div>
+</dialog>
+
+<dialog class="modal cortina" id="cortina" aria-label="Destaque">
+  <button class="fechar fechar--modal" type="button" data-fechar aria-label="Fechar">&times;</button>
+  <div id="cortina-corpo"></div>
 </dialog>
 
 <div class="aviso-toast" id="toast" role="status" aria-live="polite" hidden></div>

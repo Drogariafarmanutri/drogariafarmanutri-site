@@ -33,6 +33,37 @@ window.FARMANUTRI = {
       botao: "Tirar dúvidas", link: "whatsapp", estilo: "escuro", icone: "cruz" }
   ],
 
+  // ===================== DESTAQUES DE PRODUTO =====================
+  // Como escolher o produto: use o CODIGO do produto no Automatiza. Foto, nome e preco
+  // (com a oferta da loja) vem sempre do site, atualizados a cada 30 minutos.
+  // de / ate: periodo em que aparece (AAAA-MM-DD). Fora do periodo some sozinho.
+  // Produto sem estoque some sozinho. Medicamento de venda sob prescricao NAO aparece (RDC 96/2008);
+  // medicamento isento aparece com a advertencia obrigatoria.
+  // estilo: "amarelo", "vermelho", "verde" ou "escuro".
+  // Tambem aceita uma ARTE PRONTA: envie a imagem para o GitHub (ex.: banners/natal.jpg) e use
+  //   { imagem: "banners/natal.jpg", imagem_celular: "banners/natal-celular.jpg", link: "#busca:panetone", ate: "2026-12-25" }
+  //   (tamanho sugerido: 1240x400 no computador e 800x800 no celular)
+  // link aceita: "#ofertas", "#leve-mais", "#busca:protetor solar", "#categoria:Mamae", "#produto:54340" ou "whatsapp"
+
+  // 1) BANNERS de produto: entram no carrossel da pagina inicial, antes dos banners acima
+  destaques: [
+    { codigo: 54340, titulo: "Oferta da semana", texto: "Proteção alta para o sol de Montes Claros.", estilo: "amarelo",
+      de: "2026-10-24", ate: "2026-10-31" },
+    { codigo: 50221, titulo: "Mamãe e bebê", estilo: "verde", de: "2026-10-24", ate: "2026-10-31" }
+  ],
+
+  // 2) FAIXA de aviso logo abaixo do menu, em todas as paginas (se tiver mais de uma, elas se revezam)
+  faixas: [
+    { texto: "Leve mais, pague menos: descontos maiores levando mais unidades.", botao: "Ver produtos", link: "#leve-mais",
+      estilo: "amarelo", de: "2026-10-24", ate: "2026-10-31" },
+    { texto: "Fralda Personal Baby Jumbo G com preço especial.", botao: "Ver oferta", codigo: 50221,
+      estilo: "verde", de: "2026-10-24", ate: "2026-10-31" }
+  ],
+
+  // 3) CORTINA: janela que abre sozinha ao entrar no site (uma vez por dia para cada cliente).
+  //    Use codigo (produto) OU imagem (arte pronta). Para desligar: cortina: null
+  cortina: { codigo: 54340, titulo: "Imperdível", texto: "Só enquanto durar o estoque.", de: "2026-10-24", ate: "2026-10-31" },
+
   // Vitrines da pagina inicial: parte do nome da categoria do Automatiza.
   // Vazio = as categorias com mais produtos.
   vitrines: [],

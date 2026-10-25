@@ -434,3 +434,57 @@ dialog::backdrop { background: rgba(38, 20, 18, .5); }
   html { scroll-behavior: auto; }
   * { transition: none !important; animation: none !important; }
 }
+
+/* ===== Destaques: banner de produto, banner com arte, faixa e cortina ===== */
+.banner--produto { grid-template-columns: minmax(0, 1fr) clamp(170px, 30vw, 330px); }
+.banner--produto h2 { font-size: clamp(26px, 4vw, 44px); max-width: 18ch; }
+.banner .destaque__chamada, .cortina .destaque__chamada { display: inline-block; margin: 0 0 10px; padding: 5px 12px; border-radius: 999px; font: 800 14px/1.2 var(--f-titulo);
+  letter-spacing: .04em; text-transform: uppercase; background: var(--marca); color: var(--branco); }
+.banner--vermelho .destaque__chamada, .banner--escuro .destaque__chamada, .banner--verde .destaque__chamada { background: var(--etiqueta); color: var(--tinta); }
+.destaque__sub { margin: -4px 0 10px !important; font-size: 16px !important; }
+.destaque__de { margin: 0 !important; font-size: 16px !important; opacity: .85; }
+.banner .destaque__por, .cortina .destaque__por { margin: 0 0 6px; font: 900 clamp(40px, 6vw, 64px)/1 var(--f-titulo); font-stretch: 80%; letter-spacing: -0.02em; max-width: none; }
+.banner--amarelo .destaque__por { color: var(--oferta); }
+.destaque__leve { display: inline-block; margin: 0 0 14px !important; padding: 4px 10px; border-radius: 8px; font-size: 15px !important; font-weight: 700;
+  background: var(--verde-claro); color: var(--verde-escuro); }
+.destaque__acoes { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; margin-top: 8px; }
+.destaque__ver { border: 0; background: none; color: inherit; font: inherit; font-weight: 700; text-decoration: underline; cursor: pointer; padding: 10px 4px; }
+.destaque__adv { margin: 14px 0 0 !important; font-size: 11px !important; line-height: 1.35; font-weight: 700; max-width: 60ch !important; opacity: .9; }
+.destaque__foto { border: 0; padding: 0; cursor: pointer; background: var(--branco); border-radius: 22px; aspect-ratio: 1; width: 100%;
+  display: grid; place-items: center; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,.18); }
+.destaque__foto img { width: 88%; height: 88%; object-fit: contain; }
+.destaque__foto .ph { width: 100%; height: 100%; }
+.banner--imagem { display: block; padding: 0; min-height: 0; background: var(--branco); }
+.banner--imagem img { display: block; width: 100%; height: auto; }
+
+.aviso { color: var(--tinta); }
+.aviso[hidden] { display: none; }
+.aviso__in { max-width: var(--largura); margin: 0 auto; padding: 0 var(--lado-d) 0 var(--lado); }
+.aviso__item { display: block; padding: 10px 0; text-align: center; font-weight: 700; font-size: 15px; text-decoration: none; color: inherit; animation: avisoEntra .4s ease; }
+.aviso__item[hidden] { display: none; }
+.aviso__item strong { text-decoration: underline; white-space: nowrap; }
+.aviso--amarelo { background: var(--etiqueta); color: var(--tinta); }
+.aviso--vermelho { background: var(--marca-escura); color: var(--branco); }
+.aviso--verde { background: var(--verde); color: var(--branco); }
+.aviso--escuro { background: var(--marca-noite); color: var(--branco); }
+@keyframes avisoEntra { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .aviso__item { animation: none; } }
+
+.cortina { width: min(760px, calc(100vw - 32px)); }
+.cortina__arte img { display: block; width: 100%; height: auto; }
+.cortina__produto { display: grid; grid-template-columns: minmax(0, 260px) minmax(0, 1fr); gap: 28px; align-items: center; padding: 34px 32px 30px; }
+.cortina__produto h2 { margin: 0 0 8px; font: 900 clamp(24px, 3.4vw, 34px)/1.05 var(--f-titulo); font-stretch: 80%; }
+.cortina__produto .destaque__por { color: var(--oferta); }
+.cortina__produto .destaque__ver { color: var(--azul); }
+
+@media (max-width: 700px) {
+  .banner--produto { grid-template-columns: minmax(0, 1fr) 120px; gap: 14px; padding: 22px 18px; }
+  .banner--produto .banner__arte { display: block; }
+  .banner--produto h2 { font-size: 22px; }
+  .banner .destaque__por { font-size: 36px; }
+  .banner .destaque__chamada { font-size: 12px; padding: 4px 10px; }
+  .destaque__foto { border-radius: 14px; }
+  .destaque__adv { font-size: 10px !important; }
+  .cortina__produto { grid-template-columns: minmax(0, 1fr); padding: 26px 20px 22px; gap: 16px; }
+  .cortina__produto .destaque__foto { max-width: 220px; margin: 0 auto; }
+}

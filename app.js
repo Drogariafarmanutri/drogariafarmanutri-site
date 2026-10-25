@@ -425,18 +425,141 @@
     return { href: l || "#ofertas", ext: false };
   }
 
+  /* ================= destaques: banners de produto, faixa e cortina ================= */
+  function hojeISO() {
+    var d = new Date();
+    return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2);
+  }
+  // Item com periodo: de/ate no formato AAAA-MM-DD (vazio = sem limite)
+  function noPeriodo(o) {
+    var h = hojeISO();
+    return o && (!o.de || String(o.de) <= h) && (!o.ate || String(o.ate) >= h);
+  }
+  // Produto que pode ser destacado: existe no site (tem estoque) e nao e venda sob prescricao (RDC 96/2008)
+  function produtoDestaque(cod) {
+    var p = cod != null ? porId[String(cod)] : null;
+    if (!p || p.rx || p.consulta) return null;
+    return p;
+  }
+  function advertenciaMed(p) {
+    return p.med ? '<p class="destaque__adv">' + esc((p._nome.split(" ")[0] || "").toUpperCase()) +
+      ' É UM MEDICAMENTO. SEU USO PODE TRAZER RISCOS. PROCURE O MÉDICO E O FARMACÊUTICO. LEIA A BULA.</p>' : "";
+  }
+  function htmlPrecoDestaque(p) {
+    var pr = promoDe(p, estado.loja), l = leveDe(p, estado.loja);
+    var h = "";
+    if (pr && (estado.loja !== "todas" || pr.geral)) {
+      h += '<p class="destaque__de">De R$ ' + reais(p.preco) + ' por</p><p class="destaque__por">R$ ' + reais(pr.valor) + '</p>';
+    } else {
+      h += '<p class="destaque__por">R$ ' + reais(p.preco) + '</p>';
+    }
+    if (l) h += '<p class="destaque__leve">Levando ' + l.qtd + ': R$ ' + reais(l.valor) + ' cada</p>';
+    return h;
+  }
+  function fotoDestaque(p) {
+    return p.img ? '<img src="img/' + p.id + '.webp" alt="" width="400" height="400">' :
+      (p.med ? '<img src="img-caixa-mip.webp" alt="" width="400" height="400">' : '<span class="ph">' + icone(p._icone) + '</span>');
+  }
+  function linkDestaque(o, p) {
+    if (o.link) return linkBanner(o);
+    return { href: "#produto:" + p.id, ext: false };
+  }
+  // Banner de produto: foto, nome e preco sempre atualizados pelo catalogo
+  function slideProduto(o) {
+    var p = produtoDestaque(o.codigo);
+    if (!p) return "";
+    var estilo = o.estilo || "amarelo";
+    return '<section class="banner banner--' + esc(estilo) + ' banner--produto" aria-roledescription="banner">' +
+      '<div class="destaque__texto">' + (o.titulo ? '<p class="destaque__chamada">' + esc(o.titulo) + '</p>' : "") +
+      '<h2>' + esc(o.nome || p._nome) + '</h2>' + (o.texto ? '<p class="destaque__sub">' + esc(o.texto) + '</p>' : "") +
+      htmlPrecoDestaque(p) +
+      '<div class="destaque__acoes"><button class="botao ' + (estilo === "amarelo" ? "botao--escuro" : "botao--branco") + '" type="button" data-add="' + p.id + '">Adicionar ao pedido</button>' +
+      '<button class="destaque__ver" type="button" data-abrir="' + p.id + '">Ver detalhes</button></div>' +
+      advertenciaMed(p) + '</div>' +
+      '<button class="destaque__foto" type="button" data-abrir="' + p.id + '" aria-label="Ver ' + esc(p._nome) + '">' + fotoDestaque(p) + '</button></section>';
+  }
+  // Banner com arte pronta (imagem enviada para a pasta banners do site)
+  function slideImagem(o) {
+    var l = linkBanner(o);
+    var alvo = l.ext ? ' target="_blank" rel="noopener"' : ' data-link="' + esc(l.href) + '"';
+    return '<a class="banner banner--imagem" href="' + esc(l.href) + '"' + alvo + ' aria-roledescription="banner">' +
+      '<picture>' + (o.imagem_celular ? '<source media="(max-width: 700px)" srcset="' + esc(o.imagem_celular) + '">' : "") +
+      '<img src="' + esc(o.imagem) + '" alt="' + esc(o.titulo || "Destaque Farmanutri") + '"></picture></a>';
+  }
+
+  function montarAvisos() {
+    var faixas = (CFG.faixas || []).filter(noPeriodo).filter(function (f) { return f.texto && (!f.codigo || produtoDestaque(f.codigo)); });
+    var el = $("aviso");
+    if (!el) return;
+    if (!faixas.length) { el.hidden = true; return; }
+    el.hidden = false;
+    el.innerHTML = '<div class="aviso__in">' + faixas.map(function (f, i) {
+      var p = f.codigo ? produtoDestaque(f.codigo) : null;
+      var l = p && !f.link ? { href: "#produto:" + p.id, ext: false } : linkBanner(f);
+      var alvo = l.ext ? ' target="_blank" rel="noopener"' : ' data-link="' + esc(l.href) + '"';
+      return '<a class="aviso__item aviso--' + esc(f.estilo || "amarelo") + '" href="' + esc(l.href) + '"' + alvo + (i ? " hidden" : "") + '>' +
+        esc(f.texto) + (f.botao ? ' <strong>' + esc(f.botao) + ' ›</strong>' : "") + '</a>';
+    }).join("") + '</div>';
+    var itens = el.querySelectorAll(".aviso__item"), n = 0;
+    el.className = "aviso aviso--" + (faixas[0].estilo || "amarelo");
+    if (itens.length > 1) setInterval(function () {
+      if (document.hidden) return;
+      itens[n].hidden = true; n = (n + 1) % itens.length; itens[n].hidden = false;
+      el.className = "aviso aviso--" + (faixas[n].estilo || "amarelo");
+    }, 5000);
+  }
+
+  // Cortina: janela que abre ao entrar no site, uma vez por dia para cada cliente
+  function abrirCortina() {
+    var c = CFG.cortina;
+    if (!c || !noPeriodo(c) || (!c.imagem && !c.codigo)) return;
+    var p = c.codigo ? produtoDestaque(c.codigo) : null;
+    if (c.codigo && !p && !c.imagem) return;
+    var chave = "farmanutri-cortina-" + (c.codigo || c.imagem) + "-" + hojeISO();
+    if (ler(chave)) return;
+    var corpo;
+    if (c.imagem) {
+      var l = linkBanner(c);
+      corpo = '<a class="cortina__arte" href="' + esc(l.href) + '"' + (l.ext ? ' target="_blank" rel="noopener"' : ' data-link="' + esc(l.href) + '"') + '>' +
+        '<img src="' + esc(c.imagem) + '" alt="' + esc(c.titulo || "Destaque Farmanutri") + '"></a>';
+    } else {
+      corpo = '<div class="cortina__produto"><button class="destaque__foto" type="button" data-abrir="' + p.id + '" aria-label="Ver ' + esc(p._nome) + '">' + fotoDestaque(p) + '</button>' +
+        '<div>' + (c.titulo ? '<p class="destaque__chamada">' + esc(c.titulo) + '</p>' : "") + '<h2>' + esc(c.nome || p._nome) + '</h2>' +
+        (c.texto ? '<p class="destaque__sub">' + esc(c.texto) + '</p>' : "") + htmlPrecoDestaque(p) +
+        '<div class="destaque__acoes"><button class="botao botao--marca" type="button" data-add="' + p.id + '" data-fechar>Adicionar ao pedido</button>' +
+        '<button class="destaque__ver" type="button" data-abrir="' + p.id + '" data-fechar>Ver detalhes</button></div>' + advertenciaMed(p) + '</div></div>';
+    }
+    $("cortina-corpo").innerHTML = corpo;
+    setTimeout(function () {
+      if (document.querySelector("dialog[open]")) return;
+      salvar(chave, 1);
+      abrirDialogo($("cortina"));
+    }, 1200);
+  }
+
   function telaInicio() {
-    var banners = (CFG.banners || []).map(function (b, i) {
+    var destaques = (CFG.destaques || []).filter(noPeriodo).map(function (o) {
+      return o.imagem ? slideImagem(o) : slideProduto(o);
+    }).filter(Boolean);
+    var comuns = (CFG.banners || []).filter(noPeriodo).map(function (b) {
+      if (b.imagem) return slideImagem(b);
+      if (b.codigo) return slideProduto(b);
+      return null;
+    });
+    var banners = (CFG.banners || []).filter(noPeriodo).map(function (b, i) {
+      if (comuns[i] !== null) return comuns[i];
       var l = linkBanner(b);
       var estilo = b.estilo || "verde";
       var arte = b.icone === "oferta" ? '<span class="banner__pct">%</span>' :
         b.icone === "logo" ? '<img src="logo-vermelho.webp" alt="" width="600" height="600">' : icone(b.icone || "cruz");
-      return '<section class="banner banner--' + esc(estilo) + '" aria-roledescription="banner" aria-label="' + (i + 1) + ' de ' + CFG.banners.length + '">' +
+      return '<section class="banner banner--' + esc(estilo) + '" aria-roledescription="banner">' +
         '<div><h2>' + esc(b.titulo) + '</h2><p>' + esc(b.texto) + '</p>' +
         '<a class="botao ' + (estilo === "amarelo" ? "botao--escuro" : "botao--branco") + '" href="' + esc(l.href) + '"' +
         (l.ext ? ' target="_blank" rel="noopener"' : ' data-link="' + esc(l.href) + '"') + '>' + esc(b.botao || "Ver mais") + '</a></div>' +
         '<div class="banner__arte" aria-hidden="true">' + arte + '</div></section>';
-    }).join("");
+    }).filter(Boolean);
+    var slides = destaques.concat(banners);
+    banners = slides.join("");
 
     var beneficios = [
       ["whatsapp", "Pedido pelo WhatsApp", "Monte a lista aqui e envie para a loja"],
@@ -469,9 +592,9 @@
 
     var html = '<div class="in">' +
       (banners ? '<div class="banners" id="banners"><div class="banners__trilho" id="banners-trilho">' + banners + '</div>' +
-        (CFG.banners.length > 1 ? '<button class="seta seta--esq" type="button" data-banner="-1" aria-label="Banner anterior">' + icone("setaE", ' width="20" height="20"') + '</button>' +
+        (slides.length > 1 ? '<button class="seta seta--esq" type="button" data-banner="-1" aria-label="Banner anterior">' + icone("setaE", ' width="20" height="20"') + '</button>' +
           '<button class="seta seta--dir" type="button" data-banner="1" aria-label="Próximo banner">' + icone("seta", ' width="20" height="20"') + '</button>' +
-          '<div class="banners__pontos" id="banners-pontos">' + CFG.banners.map(function (b, i) { return '<button type="button" data-ponto="' + i + '" aria-label="Banner ' + (i + 1) + '"></button>'; }).join("") + '</div>' : "") +
+          '<div class="banners__pontos" id="banners-pontos">' + slides.map(function (b, i) { return '<button type="button" data-ponto="' + i + '" aria-label="Banner ' + (i + 1) + '"></button>'; }).join("") + '</div>' : "") +
         '</div>' : "") +
       '<ul class="beneficios">' + beneficios + '</ul>' +
       (circulos ? '<section class="secao"><div class="secao__topo"><h2>Categorias</h2></div><div class="circulos">' + circulos + '</div></section>' : "") +
@@ -639,6 +762,8 @@
 
   function seguirLink(href) {
     href = String(href || "");
+    var mp = /^#produto:(\d+)$/.exec(href);
+    if (mp) { if (porId[mp[1]]) abrirProduto(mp[1]); return; }
     var m = /^#busca:(.+)$/.exec(href);
     if (m) return ir("lista", { q: decodeURIComponent(m[1]) });
     m = /^#categoria:(.+)$/.exec(href);
@@ -765,7 +890,7 @@
     if (typeof d.showModal === "function") d.showModal(); else d.setAttribute("open", "");
   }
   function fecharTudo() {
-    ["painel-categorias", "painel-pedido", "modal-produto"].forEach(function (id) { var d = $(id); if (d.open) d.close(); });
+    ["painel-categorias", "painel-pedido", "modal-produto", "cortina"].forEach(function (id) { var d = $(id); if (d.open) d.close(); });
     fecharLojas();
   }
   function fecharLojas() { $("menu-lojas").hidden = true; $("btn-loja").setAttribute("aria-expanded", "false"); }
@@ -800,6 +925,7 @@
       return;
     }
     fecharMais();
+    if (t.closest("#cortina [data-add], #cortina [data-abrir]")) { $("cortina").close(); }
     if ((el = t.closest("[data-add]"))) { mudarQtd(el.getAttribute("data-add"), 1); return; }
     if ((el = t.closest("[data-mais]"))) { mudarQtd(el.getAttribute("data-mais"), 1); return; }
     if ((el = t.closest("[data-menos]"))) { mudarQtd(el.getAttribute("data-menos"), -1); return; }
@@ -911,7 +1037,9 @@
     window.addEventListener("resize", function () { clearTimeout(tempoMenu); tempoMenu = setTimeout(ajustarMenu, 120); });
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(ajustarMenu);
     contador();
+    montarAvisos();
     var termo = new URLSearchParams(location.search).get("q");
+    if (!termo && !/^#(produto|cat-|busca)/.test(location.hash)) abrirCortina();
     if (termo) { ir("lista", { q: termo }); return; }
     lerHash();
   }
