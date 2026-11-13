@@ -128,5 +128,16 @@
 <!--FIM-CORPO-->
 <script src="config.js"></script>
 <script src="app.js"></script>
+<!-- Cloudflare Web Analytics (sem cookies) -->
+<script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "405d828a3cfb465283c889d6ff02ccad"}'></script>
+<script>
+/* Conta os cliques no WhatsApp: pedido enviado (carrinho) ou contato, passando por uma pagina que registra e abre o WhatsApp */
+document.addEventListener("click", function (ev) {
+  var a = ev.target.closest && ev.target.closest('a[href^="https://wa.me/"]');
+  if (!a) return;
+  var tipo = /enviar pedido/i.test(a.textContent || "") ? "pedido" : "contato";
+  a.href = "/" + tipo + "-whatsapp.html?u=" + encodeURIComponent(a.getAttribute("href"));
+}, true);
+</script>
 </body>
 </html>
