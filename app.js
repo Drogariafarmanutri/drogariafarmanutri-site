@@ -1139,6 +1139,16 @@
       p._marca = nomeMarca(p.marca || p.lab || "");
       p._nomeNorm = norm(p._nome);
       p._busca = norm(p._nome + " " + p._marca + " " + p.ean + " " + p.id);
+      // Produto vendido fracionado (caixa aberta para vender a unidade): o preco cheio cadastrado e o da
+      // caixa e a "promocao" e o preco da unidade. Mostra o preco da unidade como preco normal, sem "De/Por".
+      if (p.promo && p.preco) {
+        var vp = Object.keys(p.promo).map(function (k) { return p.promo[k]; });
+        if (vp.length && vp.every(function (v) { return v <= p.preco * 0.3; })) {
+          p.preco = Math.max.apply(null, vp);
+          Object.keys(p.promo).forEach(function (k) { if (p.promo[k] >= p.preco) delete p.promo[k]; });
+          if (!Object.keys(p.promo).length) delete p.promo;
+        }
+      }
       p._cats = {};
       (p.cats || []).forEach(function (c) { if (catPorId[c]) { p._cats[c] = 1; catPorId[c]._qtd++; } });
       var raiz = (p.cats || []).map(function (c) { return catPorId[c]; }).filter(function (c) { return c && !c.pai; })[0];
