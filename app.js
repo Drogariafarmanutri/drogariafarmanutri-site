@@ -471,12 +471,14 @@
     var estilo = o.estilo || "amarelo";
     return '<section class="banner banner--' + esc(estilo) + ' banner--produto" aria-roledescription="banner">' +
       '<div class="destaque__texto">' + (o.titulo ? '<p class="destaque__chamada">' + esc(o.titulo) + '</p>' : "") +
+      (o.relogio ? '<p class="destaque__relogio">Novas ofertas em <span data-relogio>--:--:--</span></p>' : "") +
       '<h2>' + esc(o.nome || p._nome) + '</h2>' + (o.texto ? '<p class="destaque__sub">' + esc(o.texto) + '</p>' : "") +
       htmlPrecoDestaque(p) +
       '<div class="destaque__acoes"><button class="botao ' + (estilo === "amarelo" ? "botao--escuro" : "botao--branco") + '" type="button" data-add="' + p.id + '">Adicionar ao pedido</button>' +
       '<button class="destaque__ver" type="button" data-abrir="' + p.id + '">Ver detalhes</button></div>' +
       advertenciaMed(p) + '</div>' +
-      '<button class="destaque__foto" type="button" data-abrir="' + p.id + '" aria-label="Ver ' + esc(p._nome) + '">' + fotoDestaque(p) + '</button></section>';
+      '<button class="destaque__foto" type="button" data-abrir="' + p.id + '" aria-label="Ver ' + esc(p._nome) + '">' + fotoDestaque(p) +
+      (o.selo ? '<span class="destaque__selo">' + esc(o.selo) + '</span>' : "") + '</button></section>';
   }
   // Banner com arte pronta (imagem enviada para a pasta banners do site)
   function slideImagem(o) {
@@ -485,6 +487,113 @@
     return '<a class="banner banner--imagem" href="' + esc(l.href) + '"' + alvo + ' aria-roledescription="banner">' +
       '<picture>' + (o.imagem_celular ? '<source media="(max-width: 700px)" srcset="' + esc(o.imagem_celular) + '">' : "") +
       '<img src="' + esc(o.imagem) + '" alt="' + esc(o.titulo || "Destaque Farmanutri") + '"></picture></a>';
+  }
+
+
+  /* ================= vitrine que muda todo dia ================= */
+  // Sorteio "do dia": muda a cada dia, mas e o mesmo para todos os clientes naquele dia
+  function sorteioDia(extra) {
+    var t = hojeISO() + "|" + (extra || ""), h = 2166136261;
+    for (var i = 0; i < t.length; i++) h = Math.imul(h ^ t.charCodeAt(i), 16777619);
+    return function () {
+      h = (h + 0x6D2B79F5) | 0;
+      var x = Math.imul(h ^ (h >>> 15), 1 | h);
+      x = (x + Math.imul(x ^ (x >>> 7), 61 | x)) ^ x;
+      return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function embaralharDia(lista, extra) {
+    var r = sorteioDia(extra), a = lista.slice();
+    for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(r() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; }
+    return a;
+  }
+  function raizDe(p) {
+    for (var i = 0; i < (p.cats || []).length; i++) { var c = catPorId[p.cats[i]]; if (c && !c.pai) return c.id; }
+    return 0;
+  }
+  function estoqueTotal(p, loja) {
+    if (loja && loja !== "todas") return p.estoque[loja] || 0;
+    return lojasCom(p).reduce(function (s, k) { return s + p.estoque[k]; }, 0);
+  }
+  // Produto bom para chamar atencao: nao e medicamento (RDC 96/2008), tem foto, oferta real na loja
+  // escolhida, desconto entre 15% e 60% (fora disso costuma ser erro de cadastro), preco de oferta a
+  // partir de R$ 10 e estoque para atender
+  function chamariz(p) {
+    if (p.med || p.rx || p.consulta || !p.img || !visivel(p, estado.loja)) return 0;
+    var raiz = catPorId[raizDe(p)];
+    if (raiz && /conveni|brinquedo/.test(norm(raiz.nome))) return 0; // banner e para produto de farmacia
+    var pr = promoValida(p, estado.loja);
+    if (!pr || pr.valor < 10 || estoqueTotal(p, estado.loja) < 3) return 0;
+    var d = Math.round((1 - pr.valor / p.preco) * 100);
+    return d >= 15 && d <= 60 ? d : 0;
+  }
+  // Escolhe n produtos do dia, sem repetir categoria
+  function ofertasDoDia(n) {
+    var cand = dados.produtos.map(function (p) { return { p: p, d: chamariz(p) }; }).filter(function (x) { return x.d; })
+      .sort(function (a, b) { return b.d - a.d; }).slice(0, 80);
+    var usadas = {}, esc1 = [];
+    embaralharDia(cand, "chamariz").forEach(function (x) {
+      var r = raizDe(x.p);
+      if (esc1.length < n && !usadas[r]) { usadas[r] = 1; esc1.push(x); }
+    });
+    return esc1;
+  }
+  // Tema do dia da semana (domingo = 0). Pode ser trocado em config.js: temas_semana: ["Saúde", "Cabelo e pele", ...] ("leve" = Leve mais)
+  var TEMAS_PADRAO = ["Saúde", "Cabelo e pele", "Higiene pessoal", "Mamãe e bebê", "Alimentação e nutrição", "Perfumes e maquiagem", "leve"];
+  var CORES_DIA = ["verde", "verde", "verde", "verde", "verde", "verde", "verde"];
+  function slideTema() {
+    var dia = new Date().getDay();
+    var nome = (CFG.temas_semana && CFG.temas_semana[dia]) || TEMAS_PADRAO[dia];
+    var estilo = CORES_DIA[dia], leve = norm(nome) === "leve", cat = null, itens;
+    if (leve) {
+      itens = dados.produtos.filter(function (p) { return !p.rx && !p.consulta && !p.med && p.img && visivel(p, estado.loja) && leveDe(p, estado.loja); });
+    } else {
+      cat = raizes().filter(function (c) { return norm(c.nome).indexOf(norm(nome)) >= 0 || norm(c._nome).indexOf(norm(nome)) >= 0; })[0];
+      var naCat = function (c) {
+        return dados.produtos.filter(function (p) { return p._cats[c.id] && !p.med && !p.rx && !p.consulta && visivel(p, estado.loja) && promoValida(p, estado.loja); });
+      };
+      itens = cat ? naCat(cat) : [];
+      // Poucas ofertas no tema do dia: usa a categoria com mais ofertas
+      if (itens.length < 4) {
+        cat = raizes().filter(function (c) { return !/medic/.test(norm(c.nome)); })
+          .map(function (c) { return { c: c, n: naCat(c).length }; }).sort(function (a, b) { return b.n - a.n; })[0];
+        cat = cat && cat.n ? cat.c : null;
+        itens = cat ? naCat(cat) : [];
+      }
+    }
+    if (itens.length < 3) return "";
+    var maior = 0;
+    itens.forEach(function (p) {
+      var d = leve ? Math.round((1 - leveDe(p, estado.loja).valor / p.preco) * 100) : Math.round((1 - promoValida(p, estado.loja).valor / p.preco) * 100);
+      if (d <= 60 && d > maior) maior = d;
+    });
+    var fotos = embaralharDia(itens.filter(function (p) { return p.img; }).sort(function (a, b) { return descontoMax(b) - descontoMax(a); }).slice(0, 30), "tema").slice(0, 3);
+    var link = leve ? "#leve-mais" : "#ofertas:cat-" + cat.id;
+    var semana = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"][dia];
+    return '<section class="banner banner--' + estilo + ' banner--tema" aria-roledescription="banner">' +
+      '<div><p class="destaque__chamada">' + semana + ' é dia de</p>' +
+      '<h2>' + esc(leve ? "Leve mais, pague menos" : cat._nome) + '</h2>' +
+      '<p>' + itens.length + (itens.length === 1 ? " oferta" : " ofertas") + (maior >= 5 ? " com até <strong>" + maior + "% off</strong>" : "") + '.</p>' +
+      '<a class="botao ' + (estilo === "amarelo" ? "botao--escuro" : "botao--branco") + '" href="' + (leve ? "#leve-mais" : "#cat-" + cat.id) + '" data-link="' + link + '">Ver ofertas</a></div>' +
+      '<div class="banner__trio">' + fotos.map(function (p) {
+        return '<button type="button" data-abrir="' + p.id + '" aria-label="Ver ' + esc(p._nome) + '"><img src="img/' + p.id + '.webp" alt="" width="400" height="400"></button>';
+      }).join("") + '</div></section>';
+  }
+  // Relogio ate a meia-noite (quando as ofertas do dia mudam)
+  var timerRelogio;
+  function iniciarRelogio() {
+    clearInterval(timerRelogio);
+    var dia = hojeISO();
+    function tic() {
+      var els = document.querySelectorAll("[data-relogio]");
+      if (!els.length) { clearInterval(timerRelogio); return; }
+      if (hojeISO() !== dia) { clearInterval(timerRelogio); if (estado.tela === "inicio") telaInicio(); return; }
+      var a = new Date(), m = new Date(a.getFullYear(), a.getMonth(), a.getDate() + 1), s = Math.max(0, Math.floor((m - a) / 1000));
+      var t = ("0" + Math.floor(s / 3600)).slice(-2) + ":" + ("0" + Math.floor(s % 3600 / 60)).slice(-2) + ":" + ("0" + s % 60).slice(-2);
+      Array.prototype.forEach.call(els, function (el) { el.textContent = t; });
+    }
+    tic();
+    timerRelogio = setInterval(tic, 1000);
   }
 
   function montarAvisos() {
@@ -558,7 +667,13 @@
         (l.ext ? ' target="_blank" rel="noopener"' : ' data-link="' + esc(l.href) + '"') + '>' + esc(b.botao || "Ver mais") + '</a></div>' +
         '<div class="banner__arte" aria-hidden="true">' + arte + '</div></section>';
     }).filter(Boolean);
-    var slides = destaques.concat(banners);
+    var CORES_OFERTA = ["amarelo", "vermelho", "escuro"];
+    var doDia = (CFG.ofertas_do_dia === 0 ? [] : ofertasDoDia(CFG.ofertas_do_dia || 3)).map(function (x, i) {
+      return slideProduto({ codigo: x.p.id, titulo: i ? "Oferta do dia" : "Ofertas de hoje", estilo: CORES_OFERTA[i % 3], selo: "-" + x.d + "%", relogio: !i });
+    });
+    var tema = slideTema();
+    // Ordem: destaques manuais, 1a oferta do dia, tema do dia, demais ofertas do dia, banners fixos
+    var slides = destaques.concat(doDia.slice(0, 1), tema ? [tema] : [], doDia.slice(1), banners);
     banners = slides.join("");
 
     var beneficios = [
@@ -574,11 +689,14 @@
       return '<a class="circulo" href="#cat-' + c.id + '" data-cat="' + c.id + '"><span class="circulo__img">' + icone(iconeCategoria(c.nome)) + '</span>' + esc(c._nome) + '</a>';
     }).join("");
 
-    var ofertas = dados.produtos.filter(function (p) { return visivel(p, estado.loja) && promoDe(p, estado.loja); })
-      .sort(function (a, b) { return descontoMax(b) - descontoMax(a) || (b.img || 0) - (a.img || 0); }).slice(0, 18);
+    // Ofertas em destaque: sorteio do dia entre as 120 maiores ofertas (com foto primeiro)
+    var ofertas = embaralharDia(dados.produtos.filter(function (p) { return visivel(p, estado.loja) && promoDe(p, estado.loja); })
+      .sort(function (a, b) { return (b.img ? 1 : 0) - (a.img ? 1 : 0) || descontoMax(b) - descontoMax(a); }).slice(0, 120), "ofertas")
+      .sort(function (a, b) { return (b.img ? 1 : 0) - (a.img ? 1 : 0); }).slice(0, 18);
 
     var leves = dados.produtos.filter(function (p) { return visivel(p, estado.loja) && leveDe(p, estado.loja); })
-      .sort(function (a, b) { return (a.rx ? 1 : 0) - (b.rx ? 1 : 0) || descontoLeve(b) - descontoLeve(a) || (b.img || 0) - (a.img || 0); }).slice(0, 18);
+      .sort(function (a, b) { return (a.rx ? 1 : 0) - (b.rx ? 1 : 0) || (b.img ? 1 : 0) - (a.img ? 1 : 0) || descontoLeve(b) - descontoLeve(a); }).slice(0, 60);
+    leves = embaralharDia(leves, "leve").sort(function (a, b) { return (a.rx ? 1 : 0) - (b.rx ? 1 : 0) || (b.img ? 1 : 0) - (a.img ? 1 : 0); }).slice(0, 18);
 
     var atalhos = (CFG.atalhos || ATALHOS_PADRAO).map(function (a) {
       var n = buscar(a.busca, "todas").length;
@@ -588,7 +706,7 @@
     var nomesVitrine = CFG.vitrines && CFG.vitrines.length ? CFG.vitrines : null;
     var vitrines = (nomesVitrine ? nomesVitrine.map(function (n) {
       return raizes().concat(dados.categorias).filter(function (c) { return norm(c.nome).indexOf(norm(n)) >= 0; })[0];
-    }).filter(Boolean) : raizes().filter(function (c) { return !/medic/.test(norm(c.nome)); }).slice(0, 3));
+    }).filter(Boolean) : embaralharDia(raizes().filter(function (c) { return !/medic/.test(norm(c.nome)) && c._qtd >= 8; }), "vitrines").slice(0, 3));
 
     var html = '<div class="in">' +
       (banners ? '<div class="banners" id="banners"><div class="banners__trilho" id="banners-trilho">' + banners + '</div>' +
@@ -604,7 +722,8 @@
 
     vitrines.forEach(function (c) {
       var itens = dados.produtos.filter(function (p) { return p._cats[c.id] && visivel(p, estado.loja); })
-        .sort(function (a, b) { return (b.img || 0) - (a.img || 0) || (promoDe(b, estado.loja) ? 1 : 0) - (promoDe(a, estado.loja) ? 1 : 0); }).slice(0, 16);
+        .sort(function (a, b) { return (b.img ? 1 : 0) - (a.img ? 1 : 0) || (promoDe(b, estado.loja) ? 1 : 0) - (promoDe(a, estado.loja) ? 1 : 0); }).slice(0, 60);
+      itens = embaralharDia(itens, "vitrine" + c.id).sort(function (a, b) { return (b.img ? 1 : 0) - (a.img ? 1 : 0); }).slice(0, 16);
       if (itens.length) html += faixaProdutos(c._nome, itens, "#cat-" + c.id, 'data-cat="' + c.id + '"');
     });
 
@@ -620,6 +739,7 @@
 
     $("tela-inicio").innerHTML = html;
     iniciarBanners();
+    iniciarRelogio();
     document.querySelectorAll("#tela-inicio .trilho").forEach(function (tr) {
       var esq = tr.previousElementSibling, dir = tr.nextElementSibling;
       function setas() {
@@ -773,6 +893,8 @@
     }
     if (href === "#ofertas") return ir("lista", { ofertas: true });
     if (href === "#leve-mais") return ir("lista", { leve: true });
+    var oc = /^#ofertas:cat-(\d+)$/.exec(href);
+    if (oc && catPorId[oc[1]]) return ir("lista", { cat: Number(oc[1]), ofertas: true });
     if (href === "#como-funciona") {
       if (estado.tela !== "inicio") ir("inicio");
       var el = $("como-funciona"); if (el) el.scrollIntoView({ behavior: "smooth" });
