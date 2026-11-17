@@ -59,7 +59,7 @@ h1, h2, h3 { text-wrap: balance; }
   display: grid; grid-template-columns: auto 1fr auto; grid-template-areas: "logo busca acoes"; gap: 12px 24px; align-items: center;
 }
 .logo { grid-area: logo; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; color: var(--marca); }
-.logo img { height: 84px; width: auto; }
+.logo img { height: 88px; width: auto; display: block; }
 .logo .logo__icone { height: 78px; }
 .logo__cruz { width: 34px; height: 34px; flex: none; }
 .logo__nome { display: flex; flex-direction: column; line-height: .9; }
@@ -381,7 +381,7 @@ dialog::backdrop { background: rgba(38, 20, 18, .5); }
 .rodape__topo p { margin: 0 0 6px; }
 .rodape a { color: var(--etiqueta); }
 .logo--rodape { background: var(--branco); border-radius: 16px; padding: 14px 18px; margin-bottom: 14px; }
-.logo--rodape img { height: 120px; }
+.logo--rodape img { height: 130px; width: auto; }
 .rodape__texto { max-width: 52ch; }
 .lojas { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; }
 .loja h3 { font: 700 17px/1.2 var(--f-texto); color: var(--branco); margin: 0 0 6px; }

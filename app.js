@@ -307,8 +307,7 @@
   /* ================= cabecalho, menu, rodape ================= */
   function htmlLogo() {
     if (CFG.logo) return '<img src="' + esc(CFG.logo) + '" alt="Drogaria Popular Farmanutri">';
-    return '<img class="logo__icone" src="logo-cruz.png" alt="" width="180" height="185">' +
-      '<img src="logo-texto.png" alt="Drogaria Popular Farmanutri" width="385" height="200">';
+    return '<img src="logo-cab.webp" alt="Drogaria Popular Farmanutri" width="618" height="240">';
   }
 
   function raizes() {
@@ -377,7 +376,7 @@
 
   function montarRodape() {
     $("logo").innerHTML = htmlLogo();
-    $("logo-rodape").innerHTML = '<img src="logo-completo.png" alt="Drogaria Popular Farmanutri" width="344" height="360">';
+    $("logo-rodape").innerHTML = '<img src="logo-rodape.webp" alt="Drogaria Popular Farmanutri" width="447" height="480">';
     var w = linkWhats("", "Olá! Vim pelo site da Farmanutri.");
     ["faixa-whats", "rodape-whats", "btn-atendimento"].forEach(function (id) { $(id).href = w; });
     var tel = telefone(CFG.whatsapp_padrao);
