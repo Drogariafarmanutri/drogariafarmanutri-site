@@ -479,6 +479,23 @@
       '<button class="destaque__foto" type="button" data-abrir="' + p.id + '" aria-label="Ver ' + esc(p._nome) + '">' + fotoDestaque(p) +
       (o.selo ? '<span class="destaque__selo">' + esc(o.selo) + '</span>' : "") + '</button></section>';
   }
+  // Campanha de indicacao: lista "indicacao" do catalogo.json (grupo CAMPANHA INDICACAO do Automatiza,
+  // textos em campanha_indicacao.csv no sv-matriz). Sempre um slide, trocando de produto a cada 4 horas.
+  // config.js (opcional): indicacao_troca_horas: 4, indicacao_titulo: "Destaque Farmanutri", indicacao_estilo: "verde"
+  function produtoIndicacao() {
+    var lista = (dados.indicacao || []).filter(function (x) { return x && produtoDestaque(x.id); });
+    var naLoja = lista.filter(function (x) { return visivel(porId[String(x.id)], estado.loja); });
+    if (naLoja.length) lista = naLoja;
+    if (!lista.length) return null;
+    var horas = Math.max(1, Number(CFG.indicacao_troca_horas) || 4);
+    var d = new Date(), local = d.getTime() - d.getTimezoneOffset() * 60000;
+    return lista[Math.floor(local / (horas * 3600000)) % lista.length];
+  }
+  function slideIndicacao(x) {
+    if (!x) return "";
+    return slideProduto({ codigo: x.id, titulo: x.titulo || CFG.indicacao_titulo || "Destaque Farmanutri",
+      texto: x.texto || "", estilo: CFG.indicacao_estilo || "verde" });
+  }
   // Banner com arte pronta (imagem enviada para a pasta banners do site)
   function slideImagem(o) {
     var l = linkBanner(o);
@@ -697,12 +714,16 @@
         '<div class="banner__arte" aria-hidden="true">' + arte + '</div></section>';
     }).filter(Boolean);
     var CORES_OFERTA = ["amarelo", "vermelho", "escuro"];
-    var doDia = (CFG.ofertas_do_dia === 0 ? [] : ofertasDoDia(CFG.ofertas_do_dia || 3)).map(function (x, i) {
+    var indicacao = produtoIndicacao();
+    var doDia = (CFG.ofertas_do_dia === 0 ? [] : ofertasDoDia(CFG.ofertas_do_dia || 3)).filter(function (x) {
+      return !indicacao || String(x.p.id) !== String(indicacao.id);
+    }).map(function (x, i) {
       return slideProduto({ codigo: x.p.id, titulo: i ? "Oferta do dia" : "Ofertas de hoje", estilo: CORES_OFERTA[i % 3], selo: "-" + x.d + "%", relogio: !i });
     });
     var tema = slideTema();
-    // Ordem: destaques manuais, 1a oferta do dia, tema do dia, demais ofertas do dia, banners fixos
-    var slides = destaques.concat(doDia.slice(0, 1), tema ? [tema] : [], doDia.slice(1), banners);
+    // Ordem: campanha de indicacao (sempre a primeira), destaques manuais, 1a oferta do dia, tema do dia,
+    // demais ofertas do dia, banners fixos
+    var slides = [slideIndicacao(indicacao)].filter(Boolean).concat(destaques, doDia.slice(0, 1), tema ? [tema] : [], doDia.slice(1), banners);
     banners = slides.join("");
 
     var beneficios = [

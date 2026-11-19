@@ -1,28 +1,28 @@
 {
- "gerado_em": "2026-11-19T19:00-03:00",
+ "gerado_em": "2026-11-19T19:30-03:00",
  "dia": "2026-11-19",
  "ativo": true,
  "produto": {
-  "id": 55456,
-  "nome": "Absorvente Sym Noite e Dia Seca com Abas",
-  "preco": 26.54,
-  "promo_min": 19.29,
-  "promo_max": 19.29,
-  "desconto": 27,
+  "id": 31426,
+  "nome": "Creme Nivea Lata",
+  "preco": 39.74,
+  "promo_min": 33.29,
+  "promo_max": 33.29,
+  "desconto": 16,
   "lojas": [
    "Joao Alves",
    "Maracana",
-   "Independencia"
+   "Independencia",
+   "Sao Geraldo"
   ],
-  "estoque": 19
+  "estoque": 16
  },
- "url": "https://drogariafarmanutri.com.br/?produto=55456",
+ "url": "https://drogariafarmanutri.com.br/?produto=31426",
  "anuncio": {
   "titulos": [
-   "Absorvente Sym Noite e Dia",
-   "Absorvente Sym Noite",
-   "Por R$ 19,29",
-   "27% de desconto",
+   "Creme Nivea Lata",
+   "Por R$ 33,29",
+   "16% de desconto",
    "Promoção da semana",
    "Farmanutri Montes Claros",
    "Peça pelo WhatsApp",
@@ -31,17 +31,16 @@
    "4 lojas em Montes Claros"
   ],
   "descricoes": [
-   "Absorvente Sym Noite e Dia Seca com Abas de R$ 26,54 por R$ 19,29. Promoção da semana.",
+   "Creme Nivea Lata de R$ 39,74 por R$ 33,29. Promoção da semana.",
    "Monte o pedido no site, envie pelo WhatsApp e retire na loja mais perto de você.",
    "Drogaria Popular Farmanutri: 4 lojas em Montes Claros. Veja o estoque de cada loja.",
    "Oferta válida enquanto durar o estoque, nas lojas Farmanutri de Montes Claros."
   ],
   "caminho1": "promocao",
-  "caminho2": "absorvente"
+  "caminho2": "creme"
  },
  "palavras_chave": [
-  "absorvente sym noite e dia seca com abas",
-  "absorvente sym noite"
+  "creme nivea lata"
  ],
- "versao": "45fa210c4c9a"
+ "versao": "9039c9699024"
 }
