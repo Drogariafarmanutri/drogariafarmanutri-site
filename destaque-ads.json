@@ -1,28 +1,28 @@
 {
- "gerado_em": "2026-11-19T18:30-03:00",
+ "gerado_em": "2026-11-19T19:00-03:00",
  "dia": "2026-11-19",
  "ativo": true,
  "produto": {
-  "id": 32345,
-  "nome": "Coca Cola Lata",
-  "preco": 6.66,
-  "promo_min": 5.19,
-  "promo_max": 5.19,
-  "desconto": 22,
+  "id": 55456,
+  "nome": "Absorvente Sym Noite e Dia Seca com Abas",
+  "preco": 26.54,
+  "promo_min": 19.29,
+  "promo_max": 19.29,
+  "desconto": 27,
   "lojas": [
    "Joao Alves",
    "Maracana",
-   "Independencia",
-   "Sao Geraldo"
+   "Independencia"
   ],
-  "estoque": 41
+  "estoque": 19
  },
- "url": "https://drogariafarmanutri.com.br/?produto=32345",
+ "url": "https://drogariafarmanutri.com.br/?produto=55456",
  "anuncio": {
   "titulos": [
-   "Coca Cola Lata",
-   "Por R$ 5,19",
-   "22% de desconto",
+   "Absorvente Sym Noite e Dia",
+   "Absorvente Sym Noite",
+   "Por R$ 19,29",
+   "27% de desconto",
    "Promoção da semana",
    "Farmanutri Montes Claros",
    "Peça pelo WhatsApp",
@@ -31,16 +31,17 @@
    "4 lojas em Montes Claros"
   ],
   "descricoes": [
-   "Coca Cola Lata de R$ 6,66 por R$ 5,19. Promoção da semana.",
+   "Absorvente Sym Noite e Dia Seca com Abas de R$ 26,54 por R$ 19,29. Promoção da semana.",
    "Monte o pedido no site, envie pelo WhatsApp e retire na loja mais perto de você.",
    "Drogaria Popular Farmanutri: 4 lojas em Montes Claros. Veja o estoque de cada loja.",
    "Oferta válida enquanto durar o estoque, nas lojas Farmanutri de Montes Claros."
   ],
   "caminho1": "promocao",
-  "caminho2": "coca"
+  "caminho2": "absorvente"
  },
  "palavras_chave": [
-  "coca cola lata"
+  "absorvente sym noite e dia seca com abas",
+  "absorvente sym noite"
  ],
- "versao": "a6d9fccece62"
+ "versao": "45fa210c4c9a"
 }
