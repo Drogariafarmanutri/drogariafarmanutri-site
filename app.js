@@ -645,6 +645,36 @@
     }, 1200);
   }
 
+  /* ================= encartes (artes em pe enviadas pelo painel Farmanutri TV) ================= */
+  // encartes.json e gravado pelo painel das TVs (sv-matriz) e publicado pelo sincronizador.
+  // Cada encarte: { id, titulo, oferta, imagens: ["encartes/xxx.jpg"], ate: "AAAA-MM-DD" }. Vencido some sozinho.
+  var encartesSite = [];
+  function encartesValidos() {
+    var h = hojeISO();
+    return encartesSite.filter(function (e) { return e && e.imagens && e.imagens.length && (!e.ate || String(e.ate) >= h); });
+  }
+  function dataCurta(iso) { var p = String(iso || "").split("-"); return p.length === 3 ? p[2] + "/" + p[1] : ""; }
+  function htmlEncartes() {
+    var lista = encartesValidos();
+    if (!lista.length) return "";
+    return '<section class="secao" id="encartes"><div class="secao__topo"><h2>Encartes de ofertas</h2></div>' +
+      '<div class="encartes">' + lista.map(function (e, i) {
+        var info = (e.oferta ? "Só hoje" : (e.ate ? "Até " + dataCurta(e.ate) : "")) + (e.imagens.length > 1 ? " · " + e.imagens.length + " páginas" : "");
+        return '<button class="encarte" type="button" data-encarte="' + i + '" aria-label="Ver o encarte ' + esc(e.titulo || "de ofertas") + '">' +
+          '<img src="' + esc(e.imagens[0]) + '" alt="" width="720" height="1280" loading="lazy">' +
+          '<span class="encarte__txt"><strong>' + esc(e.titulo || "Ofertas") + '</strong>' + (info ? '<span>' + esc(info) + '</span>' : "") + '</span></button>';
+      }).join("") + '</div>' +
+      '<p class="encartes__nota">Ofertas válidas enquanto durarem os estoques. Confira o preço da sua loja antes de enviar o pedido.</p></section>';
+  }
+  function abrirEncarte(i) {
+    var e = encartesValidos()[i];
+    if (!e) return;
+    $("cortina-corpo").innerHTML = '<div class="cortina__encarte">' + e.imagens.map(function (src, k) {
+      return '<img src="' + esc(src) + '" alt="' + esc((e.titulo || "Encarte") + (e.imagens.length > 1 ? ", página " + (k + 1) : "")) + '" width="720" height="1280">';
+    }).join("") + '</div>';
+    abrirDialogo($("cortina"));
+  }
+
   function telaInicio() {
     var destaques = (CFG.destaques || []).filter(noPeriodo).map(function (o) {
       return o.imagem ? slideImagem(o) : slideProduto(o);
@@ -714,6 +744,7 @@
           '<div class="banners__pontos" id="banners-pontos">' + slides.map(function (b, i) { return '<button type="button" data-ponto="' + i + '" aria-label="Banner ' + (i + 1) + '"></button>'; }).join("") + '</div>' : "") +
         '</div>' : "") +
       '<ul class="beneficios">' + beneficios + '</ul>' +
+      htmlEncartes() +
       (circulos ? '<section class="secao"><div class="secao__topo"><h2>Categorias</h2></div><div class="circulos">' + circulos + '</div></section>' : "") +
       (ofertas.length ? faixaProdutos("Ofertas em destaque" + (estado.loja !== "todas" ? " no " + nomeLoja(estado.loja) : ""), ofertas, "#ofertas", 'data-ir="ofertas"') : "") +
       (leves.length ? faixaProdutos("Leve mais, pague menos", leves, "#leve-mais", 'data-ir="leve"') : "") +
@@ -1052,6 +1083,7 @@
     if ((el = t.closest("[data-menos]"))) { mudarQtd(el.getAttribute("data-menos"), -1); return; }
     if ((el = t.closest("[data-remover]"))) { mudarQtd(el.getAttribute("data-remover"), -99); return; }
     if ((el = t.closest("[data-abrir]"))) { abrirProduto(el.getAttribute("data-abrir")); return; }
+    if ((el = t.closest("[data-encarte]"))) { abrirEncarte(Number(el.getAttribute("data-encarte"))); return; }
     if (t.closest("[data-limpar-pedido]")) { pedido = {}; salvar(CHAVE_PEDIDO, pedido); contador(); desenharPedido(); desenhar(false); return; }
     if (t.closest("[data-ver-pedido]")) { $("toast").hidden = true; desenharPedido(); abrirDialogo($("painel-pedido")); return; }
     if ((el = t.closest("[data-fechar]"))) { var d = el.closest("dialog"); if (d) d.close(); return; }
@@ -1178,7 +1210,13 @@
   var versao = Math.floor(Date.now() / 300000);
   var fonte = window.CATALOGO_PREVIA ? Promise.resolve(window.CATALOGO_PREVIA) :
     fetch("catalogo.json?v=" + versao).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); });
-  fonte.then(iniciar).catch(function () {
+  // Encartes: se o arquivo nao existir ou falhar, o site abre normalmente sem eles
+  var fonteEncartes = window.CATALOGO_PREVIA ? Promise.resolve(null) :
+    fetch("encartes.json?v=" + versao).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
+  Promise.all([fonte, fonteEncartes]).then(function (r) {
+    encartesSite = (r[1] && r[1].encartes) || [];
+    iniciar(r[0]);
+  }).catch(function () {
     $("tela-inicio").innerHTML = '<div class="in"><div class="vazio" style="margin-top:24px"><strong>Não foi possível carregar os produtos agora.</strong><p>Atualize a página em alguns instantes ou fale com a gente pelo WhatsApp (38) 3212-4433.</p></div></div>';
   });
 })();

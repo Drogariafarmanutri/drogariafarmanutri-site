@@ -471,6 +471,21 @@ dialog::backdrop { background: rgba(38, 20, 18, .5); }
 @media (prefers-reduced-motion: reduce) { .aviso__item { animation: none; } }
 
 .cortina { width: min(760px, calc(100vw - 32px)); }
+.cortina:has(.cortina__encarte) { width: min(520px, calc(100vw - 24px)); }
+.cortina__encarte { display: grid; gap: 10px; background: var(--branco); }
+.cortina__encarte img { display: block; width: 100%; height: auto; }
+
+/* Encartes em pe (enviados pelo painel das TVs) */
+.encartes { display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: thin; padding-bottom: 6px; }
+.encarte { flex: 0 0 clamp(150px, 19vw, 210px); scroll-snap-align: start; display: flex; flex-direction: column; padding: 0; border: 0; border-radius: var(--raio);
+  overflow: hidden; background: var(--branco); color: inherit; text-align: left; cursor: pointer; box-shadow: 0 2px 10px rgba(46,38,36,.10); transition: transform .15s ease, box-shadow .15s ease; }
+.encarte:hover, .encarte:focus-visible { transform: translateY(-3px); box-shadow: 0 10px 24px rgba(46,38,36,.18); }
+.encarte img { display: block; width: 100%; height: auto; aspect-ratio: 9 / 16; object-fit: cover; background: var(--linha); }
+.encarte__txt { display: block; padding: 8px 10px 10px; }
+.encarte__txt strong { display: block; font-size: 14px; line-height: 1.2; }
+.encarte__txt span { display: block; font-size: 12px; color: var(--apagado); margin-top: 2px; }
+.encartes__nota { margin: 8px 0 0; font-size: 12px; color: var(--apagado); }
+@media (prefers-reduced-motion: reduce) { .encarte { transition: none; } .encarte:hover { transform: none; } }
 .cortina__arte img { display: block; width: 100%; height: auto; }
 .cortina__produto { display: grid; grid-template-columns: minmax(0, 260px) minmax(0, 1fr); gap: 28px; align-items: center; padding: 34px 32px 30px; }
 .cortina__produto h2 { margin: 0 0 8px; font: 900 clamp(24px, 3.4vw, 34px)/1.05 var(--f-titulo); font-stretch: 80%; }
