@@ -1201,10 +1201,26 @@
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(ajustarMenu);
     contador();
     montarAvisos();
-    var termo = new URLSearchParams(location.search).get("q");
-    if (!termo && !/^#(produto|cat-|busca)/.test(location.hash)) abrirCortina();
+    var parametros = new URLSearchParams(location.search);
+    var termo = parametros.get("q");
+    // ?produto=123 (link do anuncio do Google Ads): abre o produto por cima da lista de ofertas.
+    // Se a pessoa ja navegou (tem #cat-, #busca...) e recarregou a pagina, vale o que esta depois do #.
+    var linkProduto = String(parametros.get("produto") || "").replace(/\D/g, "");
+    if (linkProduto && !/^#?(inicio|ofertas)?$/.test(location.hash)) linkProduto = "";
+    if (!termo && !linkProduto && !/^#(produto|cat-|busca)/.test(location.hash)) abrirCortina();
     if (termo) { ir("lista", { q: termo }); return; }
+    if (linkProduto) { abrirLinkProduto(linkProduto); return; }
     lerHash();
+  }
+
+  function abrirLinkProduto(id) {
+    ir("lista", { ofertas: true });
+    var p = porId[id];
+    if (!p) { toast("Esse produto acabou no estoque. Veja as outras ofertas."); return; }
+    abrirProduto(id);
+    try {
+      if (window.gtag) window.gtag("event", "view_item", { currency: "BRL", items: [{ item_id: String(p.id), item_name: p._nome }], origem: "link_produto" });
+    } catch (e) { /* sem GA4 */ }
   }
 
   var versao = Math.floor(Date.now() / 300000);
