@@ -1,6 +1,15 @@
 {
-    "atualizado": "2026-11-20T00:00:00-03:00",
+    "atualizado": "2026-11-20T07:00:03-03:00",
     "encartes": [
+        {
+            "id": "s7r7jg",
+            "titulo": "Oferta do dia",
+            "oferta": true,
+            "imagens": [
+                "encartes/s7r7jg-1-e882bacd1b.jpg"
+            ],
+            "ate": "2026-11-20"
+        },
         {
             "id": "tbg2mw",
             "titulo": "Ofertas da semana",
