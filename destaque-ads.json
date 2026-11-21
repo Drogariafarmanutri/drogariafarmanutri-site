@@ -1,46 +1,6 @@
 {
- "gerado_em": "2026-11-20T06:00-03:00",
- "dia": "2026-11-20",
- "ativo": true,
- "produto": {
-  "id": 31426,
-  "nome": "Creme Nivea Lata",
-  "preco": 39.74,
-  "promo_min": 33.29,
-  "promo_max": 33.29,
-  "desconto": 16,
-  "lojas": [
-   "Joao Alves",
-   "Maracana",
-   "Independencia",
-   "Sao Geraldo"
-  ],
-  "estoque": 16
- },
- "url": "https://drogariafarmanutri.com.br/?produto=31426",
- "anuncio": {
-  "titulos": [
-   "Creme Nivea Lata",
-   "Por R$ 33,29",
-   "16% de desconto",
-   "Promoção da semana",
-   "Farmanutri Montes Claros",
-   "Peça pelo WhatsApp",
-   "Retire na loja mais perto",
-   "Drogaria Popular Farmanutri",
-   "4 lojas em Montes Claros"
-  ],
-  "descricoes": [
-   "Creme Nivea Lata de R$ 39,74 por R$ 33,29. Promoção da semana.",
-   "Monte o pedido no site, envie pelo WhatsApp e retire na loja mais perto de você.",
-   "Drogaria Popular Farmanutri: 4 lojas em Montes Claros. Veja o estoque de cada loja.",
-   "Oferta válida enquanto durar o estoque, nas lojas Farmanutri de Montes Claros."
-  ],
-  "caminho1": "promocao",
-  "caminho2": "creme"
- },
- "palavras_chave": [
-  "creme nivea lata"
- ],
- "versao": "9039c9699024"
+ "gerado_em": "2026-11-21T06:00-03:00",
+ "dia": "2026-11-21",
+ "ativo": false,
+ "motivo": "Nenhum produto em promocao vendido no periodo passou nos filtros."
 }
