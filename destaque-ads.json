@@ -1,6 +1,47 @@
 {
- "gerado_em": "2026-11-21T06:00-03:00",
- "dia": "2026-11-21",
- "ativo": false,
- "motivo": "Nenhum produto em promocao vendido no periodo passou nos filtros."
+ "gerado_em": "2026-11-22T06:00-03:00",
+ "dia": "2026-11-22",
+ "ativo": true,
+ "produto": {
+  "id": 46939,
+  "nome": "Fralda Descartável Babysec Galinha Pintadinha Hiper",
+  "preco": 81.06,
+  "promo_min": 70.49,
+  "promo_max": 70.49,
+  "desconto": 13,
+  "lojas": [
+   "Joao Alves",
+   "Independencia",
+   "Sao Geraldo"
+  ],
+  "estoque": 34
+ },
+ "url": "https://drogariafarmanutri.com.br/?produto=46939",
+ "anuncio": {
+  "titulos": [
+   "Fralda Descartável Babysec",
+   "Por R$ 70,49",
+   "13% de desconto",
+   "Promoção da semana",
+   "Farmanutri Montes Claros",
+   "Peça pelo WhatsApp",
+   "Retire na loja mais perto",
+   "Drogaria Popular Farmanutri",
+   "4 lojas em Montes Claros"
+  ],
+  "descricoes": [
+   "Fralda Descartável Babysec Galinha de R$ 81,06 por R$ 70,49. Promoção da semana.",
+   "Monte o pedido no site, envie pelo WhatsApp e retire na loja mais perto de você.",
+   "Drogaria Popular Farmanutri: 4 lojas em Montes Claros. Veja o estoque de cada loja.",
+   "Oferta válida enquanto durar o estoque, nas lojas Farmanutri de Montes Claros."
+  ],
+  "caminho1": "promocao",
+  "caminho2": "fralda"
+ },
+ "palavras_chave": [
+  "fralda descartavel babysec galinha pintadinha hiper",
+  "fralda descartavel babysec galinha",
+  "fralda descartavel babysec"
+ ],
+ "versao": "b23b532c25af"
 }
