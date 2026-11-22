@@ -1,6 +1,15 @@
 {
-    "atualizado": "2026-11-21T00:00:01-03:00",
+    "atualizado": "2026-11-22T07:00:05-03:00",
     "encartes": [
+        {
+            "id": "zny2yu",
+            "titulo": "Oferta do dia",
+            "oferta": true,
+            "imagens": [
+                "encartes/zny2yu-1-d944c60308.jpg"
+            ],
+            "ate": "2026-11-22"
+        },
         {
             "id": "tbg2mw",
             "titulo": "Ofertas da semana",
