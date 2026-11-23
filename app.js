@@ -496,6 +496,67 @@
     return slideProduto({ codigo: x.id, titulo: x.titulo || CFG.indicacao_titulo || "Destaque Farmanutri",
       texto: x.texto || "", estilo: CFG.indicacao_estilo || "verde" });
   }
+  /* ================= Black Friday ================= */
+  // Periodo padrao: ultima semana de novembro. Para mudar ou desligar, no config.js:
+  //   black_friday: { de: "2026-11-23", ate: "2026-11-30", titulo: "Black Friday Farmanutri" }   ou   black_friday: null
+  // Os produtos vem de "curva_a" no catalogo.json (curva A de vendas, em promocao, sem medicamento): curva_a.py no sv-matriz.
+  var BF_PADRAO = { de: "2026-11-23", ate: "2026-11-30" };
+  function bfConf() {
+    var c = CFG.black_friday === undefined ? BF_PADRAO : CFG.black_friday;
+    return c && noPeriodo(c) ? c : null;
+  }
+  var BF_CSS = [
+    "html.bf .faixa{background:#000;color:#FFD200}",
+    "html.bf .faixa a{color:#fff}",
+    "html.bf .menu{background:#111;box-shadow:inset 0 -3px 0 #FFD200}",
+    "html.bf #aviso.aviso--bf{background:repeating-linear-gradient(135deg,#FFD200 0 18px,#F5C800 18px 36px);color:#111}",
+    "html.bf .aviso__item.aviso--bf{background:none;letter-spacing:.02em;text-transform:uppercase}",
+    "html.bf .banner--bf{background:radial-gradient(120% 140% at 85% 20%,#2b2b2b 0,#0b0b0b 62%);color:#fff;box-shadow:inset 0 0 0 3px #FFD200}",
+    "html.bf .banner--bf h2{color:#FFD200;text-transform:uppercase;max-width:none}",
+    "html.bf .bf__sel{display:inline-block;margin:0 0 12px;padding:6px 14px;background:#FFD200;color:#111;border-radius:4px;font:900 14px/1.2 var(--f-titulo);letter-spacing:.16em;text-transform:uppercase}",
+    "html.bf .banner--bf .banner__arte{background:#FFD200;color:#111}",
+    "html.bf .botao--bf{background:#FFD200;color:#111;border-color:#FFD200}",
+    "html.bf .botao--bf:hover{background:#fff}",
+    "html.bf .secao--bf{background:#0b0b0b;border-radius:var(--raio);padding:18px 16px 20px;box-shadow:inset 0 0 0 2px #FFD200}",
+    "html.bf .secao--bf .secao__topo h2{color:#FFD200;text-transform:uppercase;letter-spacing:.02em}",
+    "html.bf .secao--bf .ver-todos{color:#FFD200}"
+  ].join("");
+  function bfTema() {
+    if (!bfConf() || document.getElementById("bf-css")) return;
+    document.documentElement.classList.add("bf");
+    var st = document.createElement("style");
+    st.id = "bf-css";
+    st.textContent = BF_CSS;
+    document.head.appendChild(st);
+  }
+  // Curva A em promocao na loja escolhida: maior desconto primeiro, com foto antes de sem foto, ate 18
+  function bfProdutos() {
+    if (!bfConf()) return [];
+    var lista = (dados.curva_a || []).map(function (id) { return porId[String(id)]; }).filter(function (p) {
+      return p && !p.rx && !p.consulta && !p.med && visivel(p, estado.loja) && promoDe(p, estado.loja) && descontoMax(p) >= 5;
+    });
+    lista.sort(function (a, b) { return descontoMax(b) - descontoMax(a); });
+    lista = lista.slice(0, 40).sort(function (a, b) { return (b.img ? 1 : 0) - (a.img ? 1 : 0); });
+    return lista.slice(0, 18);
+  }
+  function slideBF(lista) {
+    var c = bfConf();
+    if (!c) return "";
+    var max = 0;
+    lista.forEach(function (p) { max = Math.max(max, descontoMax(p)); });
+    var fim = c.ate ? " Só até " + dataCurta(c.ate) + ", enquanto durar o estoque." : "";
+    return '<section class="banner banner--bf" aria-roledescription="banner"><div>' +
+      '<p class="bf__sel">' + esc(c.titulo || "Black Friday Farmanutri") + '</p>' +
+      '<h2>' + (max >= 10 ? "Até " + max + "% OFF" : "Ofertas imperdíveis") + '</h2>' +
+      '<p>' + (lista.length ? "Nos produtos mais vendidos das nossas lojas." : "Preços especiais em várias categorias.") + fim + '</p>' +
+      '<a class="botao botao--bf" href="#ofertas" data-ir="ofertas">Ver as ofertas</a></div>' +
+      '<div class="banner__arte" aria-hidden="true"><span class="banner__pct">%</span></div></section>';
+  }
+  function secaoBF(lista) {
+    if (!lista.length) return "";
+    return faixaProdutos("Black Friday: mais vendidos com desconto" + (estado.loja !== "todas" ? " no " + nomeLoja(estado.loja) : ""),
+      lista, "#ofertas", 'data-ir="ofertas"').replace('<section class="secao">', '<section class="secao secao--bf" id="black-friday">');
+  }
   // Banner com arte pronta (imagem enviada para a pasta banners do site)
   function slideImagem(o) {
     var l = linkBanner(o);
@@ -613,7 +674,9 @@
   }
 
   function montarAvisos() {
-    var faixas = (CFG.faixas || []).filter(noPeriodo).filter(function (f) { return f.texto && (!f.codigo || produtoDestaque(f.codigo)); });
+    var bfc = bfConf();
+    var faixas = (bfc ? [{ texto: "Black Friday Farmanutri: ofertas nos mais vendidos" + (bfc.ate ? " até " + dataCurta(bfc.ate) : ""), botao: "Ver ofertas", link: "#ofertas", estilo: "bf" }] : [])
+      .concat((CFG.faixas || []).filter(noPeriodo).filter(function (f) { return f.texto && (!f.codigo || produtoDestaque(f.codigo)); }));
     var el = $("aviso");
     if (!el) return;
     if (!faixas.length) { el.hidden = true; return; }
@@ -715,15 +778,16 @@
     }).filter(Boolean);
     var CORES_OFERTA = ["amarelo", "vermelho", "escuro"];
     var indicacao = produtoIndicacao();
+    var bf = bfProdutos();
     var doDia = (CFG.ofertas_do_dia === 0 ? [] : ofertasDoDia(CFG.ofertas_do_dia || 3)).filter(function (x) {
       return !indicacao || String(x.p.id) !== String(indicacao.id);
     }).map(function (x, i) {
       return slideProduto({ codigo: x.p.id, titulo: i ? "Oferta do dia" : "Ofertas de hoje", estilo: CORES_OFERTA[i % 3], selo: "-" + x.d + "%", relogio: !i });
     });
     var tema = slideTema();
-    // Ordem: campanha de indicacao (sempre a primeira), destaques manuais, 1a oferta do dia, tema do dia,
+    // Ordem: Black Friday (no periodo), campanha de indicacao (sempre), destaques manuais, 1a oferta do dia, tema do dia,
     // demais ofertas do dia, banners fixos
-    var slides = [slideIndicacao(indicacao)].filter(Boolean).concat(destaques, doDia.slice(0, 1), tema ? [tema] : [], doDia.slice(1), banners);
+    var slides = [slideBF(bf), slideIndicacao(indicacao)].filter(Boolean).concat(destaques, doDia.slice(0, 1), tema ? [tema] : [], doDia.slice(1), banners);
     banners = slides.join("");
 
     var beneficios = [
@@ -764,6 +828,7 @@
           '<button class="seta seta--dir" type="button" data-banner="1" aria-label="Próximo banner">' + icone("seta", ' width="20" height="20"') + '</button>' +
           '<div class="banners__pontos" id="banners-pontos">' + slides.map(function (b, i) { return '<button type="button" data-ponto="' + i + '" aria-label="Banner ' + (i + 1) + '"></button>'; }).join("") + '</div>' : "") +
         '</div>' : "") +
+      secaoBF(bf) +
       '<ul class="beneficios">' + beneficios + '</ul>' +
       htmlEncartes() +
       (circulos ? '<section class="secao"><div class="secao__topo"><h2>Categorias</h2></div><div class="circulos">' + circulos + '</div></section>' : "") +
@@ -1181,6 +1246,7 @@
   /* ================= inicio ================= */
   function iniciar(json) {
     dados = json;
+    bfTema();
     dados.categorias = dados.categorias || [];
     dados.lojas.forEach(function (l) { lojaPorId[String(l.id)] = l; });
     dados.categorias.forEach(function (c) { c._nome = nomeCategoria(c.nome); c._qtd = 0; catPorId[c.id] = c; });
