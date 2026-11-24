@@ -1,6 +1,15 @@
 {
-    "atualizado": "2026-11-24T00:00:01-03:00",
+    "atualizado": "2026-11-24T07:00:02-03:00",
     "encartes": [
+        {
+            "id": "kjjpas",
+            "titulo": "Oferta do dia",
+            "oferta": true,
+            "imagens": [
+                "encartes/kjjpas-1-6a929cb316.jpg"
+            ],
+            "ate": "2026-11-24"
+        },
         {
             "id": "tbg2mw",
             "titulo": "Ofertas da semana",
