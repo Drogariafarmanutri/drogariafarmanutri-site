@@ -455,8 +455,12 @@
     if (l) h += '<p class="destaque__leve">Levando ' + l.qtd + ': R$ ' + reais(l.valor) + ' cada</p>';
     return h;
   }
+  // A 1a foto de destaque (1o banner do carrossel) e o maior elemento da tela: carrega com prioridade
+  var primeiraFotoDestaque = true;
   function fotoDestaque(p) {
-    return p.img ? '<img src="img/' + p.id + '.webp" alt="" width="400" height="400">' :
+    var prio = primeiraFotoDestaque ? ' fetchpriority="high"' : ' loading="lazy"';
+    primeiraFotoDestaque = false;
+    return p.img ? '<img src="img/' + p.id + '.webp" alt="" width="400" height="400"' + prio + '>' :
       (p.med ? '<img src="img-caixa-mip.webp" alt="" width="400" height="400">' : '<span class="ph">' + icone(p._icone) + '</span>');
   }
   function linkDestaque(o, p) {
@@ -1312,7 +1316,7 @@
 
   var versao = Math.floor(Date.now() / 300000);
   var fonte = window.CATALOGO_PREVIA ? Promise.resolve(window.CATALOGO_PREVIA) :
-    fetch("catalogo.json?v=" + versao).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); });
+    fetch("catalogo.json?v=" + versao, { priority: "high" }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); });
   // Encartes: se o arquivo nao existir ou falhar, o site abre normalmente sem eles
   var fonteEncartes = window.CATALOGO_PREVIA ? Promise.resolve(null) :
     fetch("encartes.json?v=" + versao).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
