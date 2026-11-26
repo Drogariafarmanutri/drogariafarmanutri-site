@@ -1,23 +1,4 @@
 {
-    "atualizado": "2026-11-25T22:00:28-03:00",
-    "encartes": [
-        {
-            "id": "tfnfa5",
-            "titulo": "Oferta do dia",
-            "oferta": true,
-            "imagens": [
-                "encartes/tfnfa5-1-5e3a824082.jpg"
-            ],
-            "ate": "2026-11-25"
-        },
-        {
-            "id": "tbg2mw",
-            "titulo": "Ofertas da semana",
-            "oferta": false,
-            "imagens": [
-                "encartes/tbg2mw-1-254489a763.jpg"
-            ],
-            "ate": "2026-11-25"
-        }
-    ]
+    "atualizado": "2026-11-26T00:00:01-03:00",
+    "encartes": []
 }
