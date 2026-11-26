@@ -1,5 +1,5 @@
 {
-    "atualizado": "2026-11-26T17:00:04-03:00",
+    "atualizado": "2026-11-26T18:51:53-03:00",
     "encartes": [
         {
             "id": "5g8cmb",
@@ -9,6 +9,26 @@
                 "encartes/5g8cmb-1-37c0d02af6.jpg"
             ],
             "ate": "2026-11-26"
+        },
+        {
+            "id": "5p5b5q",
+            "titulo": "[promocao] dia mais barato do mes",
+            "oferta": false,
+            "imagens": [
+                "encartes/5p5b5q-1-e578942101.jpg",
+                "encartes/5p5b5q-2-c710399460.jpg",
+                "encartes/5p5b5q-3-6458473ad3.jpg",
+                "encartes/5p5b5q-4-b97055233a.jpg",
+                "encartes/5p5b5q-5-5fd74dc6b3.jpg",
+                "encartes/5p5b5q-6-385f66b86a.jpg",
+                "encartes/5p5b5q-7-2000d3da5f.jpg",
+                "encartes/5p5b5q-8-f80a469417.jpg",
+                "encartes/5p5b5q-9-9ad9a467d0.jpg",
+                "encartes/5p5b5q-10-2ad606a7ed.jpg",
+                "encartes/5p5b5q-11-b0744dcefa.jpg",
+                "encartes/5p5b5q-12-f7da98c668.jpg"
+            ],
+            "ate": "2026-11-29"
         }
     ]
 }
