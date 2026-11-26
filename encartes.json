@@ -1,4 +1,14 @@
 {
-    "atualizado": "2026-11-26T00:00:01-03:00",
-    "encartes": []
+    "atualizado": "2026-11-26T07:00:06-03:00",
+    "encartes": [
+        {
+            "id": "j4ekna",
+            "titulo": "Oferta do dia",
+            "oferta": true,
+            "imagens": [
+                "encartes/j4ekna-1-657a455b81.jpg"
+            ],
+            "ate": "2026-11-26"
+        }
+    ]
 }
