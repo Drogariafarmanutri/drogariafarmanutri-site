@@ -1,6 +1,15 @@
 {
-    "atualizado": "2026-11-27T00:00:01-03:00",
+    "atualizado": "2026-11-27T07:00:07-03:00",
     "encartes": [
+        {
+            "id": "uxgjvb",
+            "titulo": "Oferta do dia",
+            "oferta": true,
+            "imagens": [
+                "encartes/uxgjvb-1-183d70dfdf.jpg"
+            ],
+            "ate": "2026-11-27"
+        },
         {
             "id": "5p5b5q",
             "titulo": "[promocao] dia mais barato do mes",
