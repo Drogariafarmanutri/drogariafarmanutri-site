@@ -1,26 +1,29 @@
 {
- "gerado_em": "2026-11-26T06:00-03:00",
- "dia": "2026-11-26",
+ "gerado_em": "2026-11-27T06:00-03:00",
+ "dia": "2026-11-27",
  "ativo": true,
  "produto": {
-  "id": 45112,
-  "nome": "Fralda Descartável Babysec Galinha Pintadinha Mega",
-  "preco": 50.4,
-  "promo_min": 41.59,
-  "promo_max": 41.59,
-  "desconto": 17,
+  "id": 42795,
+  "nome": "Repelente Xo Inseto Locao Family Care",
+  "preco": 17.98,
+  "promo_min": 13.39,
+  "promo_max": 13.39,
+  "desconto": 26,
   "lojas": [
    "Joao Alves",
-   "Maracana"
+   "Maracana",
+   "Interlagos",
+   "Sao Geraldo"
   ],
-  "estoque": 11
+  "estoque": 48
  },
- "url": "https://drogariafarmanutri.com.br/?produto=45112",
+ "url": "https://drogariafarmanutri.com.br/?produto=42795",
  "anuncio": {
   "titulos": [
-   "Fralda Descartável Babysec",
-   "Por R$ 41,59",
-   "17% de desconto",
+   "Repelente Xo Inseto Locao",
+   "Repelente Xo Inseto",
+   "Por R$ 13,39",
+   "26% de desconto",
    "Promoção da semana",
    "Farmanutri Montes Claros",
    "Peça pelo WhatsApp",
@@ -29,18 +32,18 @@
    "4 lojas em Montes Claros"
   ],
   "descricoes": [
-   "Fralda Descartável Babysec Galinha de R$ 50,40 por R$ 41,59. Promoção da semana.",
+   "Repelente Xo Inseto Locao Family Care de R$ 17,98 por R$ 13,39. Promoção da semana.",
    "Monte o pedido no site, envie pelo WhatsApp e retire na loja mais perto de você.",
    "Drogaria Popular Farmanutri: 4 lojas em Montes Claros. Veja o estoque de cada loja.",
    "Oferta válida enquanto durar o estoque, nas lojas Farmanutri de Montes Claros."
   ],
   "caminho1": "promocao",
-  "caminho2": "fralda"
+  "caminho2": "repelente"
  },
  "palavras_chave": [
-  "fralda descartavel babysec galinha pintadinha mega",
-  "fralda descartavel babysec galinha",
-  "fralda descartavel babysec"
+  "repelente xo inseto locao family care",
+  "repelente xo inseto locao",
+  "repelente xo inseto"
  ],
- "versao": "031f3d4d970d"
+ "versao": "01af8baf49ec"
 }
