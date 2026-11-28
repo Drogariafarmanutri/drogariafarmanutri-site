@@ -1,6 +1,49 @@
 {
- "gerado_em": "2026-11-28T06:00-03:00",
+ "gerado_em": "2026-11-28T12:00-03:00",
  "dia": "2026-11-28",
- "ativo": false,
- "motivo": "Nenhum produto em promocao vendido no periodo passou nos filtros."
+ "ativo": true,
+ "produto": {
+  "id": 42795,
+  "nome": "Repelente Xo Inseto Locao Family Care",
+  "preco": 17.98,
+  "promo_min": 13.39,
+  "promo_max": 13.39,
+  "desconto": 26,
+  "lojas": [
+   "Joao Alves",
+   "Maracana",
+   "Interlagos",
+   "Sao Geraldo"
+  ],
+  "estoque": 45
+ },
+ "url": "https://drogariafarmanutri.com.br/?produto=42795",
+ "anuncio": {
+  "titulos": [
+   "Repelente Xo Inseto Locao",
+   "Repelente Xo Inseto",
+   "Por R$ 13,39",
+   "26% de desconto",
+   "Promoção da semana",
+   "Farmanutri Montes Claros",
+   "Peça pelo WhatsApp",
+   "Retire na loja mais perto",
+   "Drogaria Popular Farmanutri",
+   "4 lojas em Montes Claros"
+  ],
+  "descricoes": [
+   "Repelente Xo Inseto Locao Family Care de R$ 17,98 por R$ 13,39. Promoção da semana.",
+   "Monte o pedido no site, envie pelo WhatsApp e retire na loja mais perto de você.",
+   "Drogaria Popular Farmanutri: 4 lojas em Montes Claros. Veja o estoque de cada loja.",
+   "Oferta válida enquanto durar o estoque, nas lojas Farmanutri de Montes Claros."
+  ],
+  "caminho1": "promocao",
+  "caminho2": "repelente"
+ },
+ "palavras_chave": [
+  "repelente xo inseto locao family care",
+  "repelente xo inseto locao",
+  "repelente xo inseto"
+ ],
+ "versao": "01af8baf49ec"
 }
